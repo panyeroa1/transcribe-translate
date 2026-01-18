@@ -5,11 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {GoogleGenAI, LiveServerMessage, Modality} from '@google/genai';
-import {LitElement, css, html, PropertyValues} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
-import {createClient} from '@supabase/supabase-js';
-import {createBlob, decode, decodeAudioData} from './utils';
+import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
+import { LitElement, css, html, PropertyValues } from 'lit';
+import { customElement, state, query } from 'lit/decorators.js';
+import { createClient } from '@supabase/supabase-js';
+import { createBlob, decode, decodeAudioData } from './utils';
+import { LANGUAGE_OPTIONS } from './languages';
 import './visual-2d';
 
 const SUPABASE_URL = 'https://xscdwdnjujpkczfhqrgu.supabase.co';
@@ -106,17 +107,7 @@ const VOICE_MAP = [
   { name: 'Puck (Energetic)', value: 'Puck' },
 ];
 
-const LANGUAGES = [
-  { code: 'en-US', name: 'English (US)' },
-  { code: 'es-ES', name: 'Spanish (Spain)' },
-  { code: 'tl-PH', name: 'Filipino (Tagalog)' },
-  { code: 'fr-FR', name: 'French' },
-  { code: 'de-DE', name: 'German' },
-  { code: 'ja-JP', name: 'Japanese' },
-  { code: 'ko-KR', name: 'Korean' },
-  { code: 'zh-CN', name: 'Chinese (Simplified)' },
-  { code: 'pt-BR', name: 'Portuguese (Brazil)' },
-];
+// Languages imported from languages.ts (110+ languages from jw.org)
 
 interface TranscriptionSegment {
   text: string;
@@ -155,13 +146,13 @@ export class GdmLiveAudio extends LitElement {
 
   // Separated pipelines for input and output to prevent echo/interference
   private inputAudioContext = new (window.AudioContext ||
-    (window as any).webkitAudioContext)({sampleRate: 16000});
+    (window as any).webkitAudioContext)({ sampleRate: 16000 });
   private outputAudioContext = new (window.AudioContext ||
-    (window as any).webkitAudioContext)({sampleRate: 24000});
-  
+    (window as any).webkitAudioContext)({ sampleRate: 24000 });
+
   @state() inputNode = this.inputAudioContext.createGain();
   @state() outputNode = this.outputAudioContext.createGain();
-  
+
   private nextStartTime = 0;
   private mediaStream: MediaStream | null = null;
   private sourceNode: MediaStreamAudioSourceNode | null = null;
@@ -489,7 +480,7 @@ export class GdmLiveAudio extends LitElement {
         .select('*')
         .eq('id', 'user-config')
         .single();
-      
+
       if (data && !error) {
         this.selectedPersonaId = data.selected_persona_id || 'miles';
         this.systemPrompt = data.system_prompt || MILES_PERSONA;
@@ -548,15 +539,15 @@ export class GdmLiveAudio extends LitElement {
     this.isSettingsOpen = false;
 
     try {
-      await supabase.from('settings').upsert({ 
-        id: 'user-config', 
+      await supabase.from('settings').upsert({
+        id: 'user-config',
         selected_persona_id: this.selectedPersonaId,
-        system_prompt: this.systemPrompt, 
+        system_prompt: this.systemPrompt,
         selected_voice: this.selectedVoice,
         lang_a: this.langA,
         lang_b: this.langB
       });
-    } catch (err) {}
+    } catch (err) { }
     this.reset();
   }
 
@@ -602,7 +593,7 @@ export class GdmLiveAudio extends LitElement {
             }
             const interrupted = message.serverContent?.interrupted;
             if (interrupted) {
-              for (const source of this.sources.values()) { try { source.stop(); } catch(e) {} this.sources.delete(source); }
+              for (const source of this.sources.values()) { try { source.stop(); } catch (e) { } this.sources.delete(source); }
               this.nextStartTime = 0;
               this.currentTurnSegments = [];
             }
@@ -613,7 +604,7 @@ export class GdmLiveAudio extends LitElement {
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: {prebuiltVoiceConfig: {voiceName: this.selectedVoice as any}},
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: this.selectedVoice as any } },
           },
           systemInstruction: this.systemPrompt,
           outputAudioTranscription: {},
@@ -629,9 +620,9 @@ export class GdmLiveAudio extends LitElement {
     const lang = this.langA || 'en-US';
     // Enhanced VAD and multi-model parameters for higher accuracy
     const url = `wss://api.deepgram.com/v1/listen?model=nova-3&encoding=linear16&sample_rate=16000&channels=1&language=${lang}&interim_results=true&smart_format=true&filler_words=true&no_delay=true&vad_events=true&utterance_end_ms=1000`;
-    
+
     this.deepgramSocket = new WebSocket(url, ['token', DEEPGRAM_KEY]);
-    
+
     this.deepgramSocket.onopen = () => this.updateStatus('Enhanced Audio Ready');
     this.deepgramSocket.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
@@ -691,21 +682,21 @@ export class GdmLiveAudio extends LitElement {
     try {
       if (this.inputAudioContext.state === 'suspended') await this.inputAudioContext.resume();
       await this.initDeepgram();
-      
+
       // Professional microphone constraints for noise cancellation and echo suppression
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({ 
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
           sampleRate: 16000,
           channelCount: 1
-        } 
+        }
       });
 
       this.sourceNode = this.inputAudioContext.createMediaStreamSource(this.mediaStream);
       this.sourceNode.connect(this.inputNode);
-      
+
       this.scriptProcessorNode = this.inputAudioContext.createScriptProcessor(4096, 1, 1);
       this.scriptProcessorNode.onaudioprocess = (e) => {
         if (!this.isRecording) return;
@@ -714,7 +705,7 @@ export class GdmLiveAudio extends LitElement {
         for (let i = 0; i < pcmData.length; i++) int16[i] = pcmData[i] * 32768;
         if (this.deepgramSocket?.readyState === WebSocket.OPEN) this.deepgramSocket.send(int16.buffer);
       };
-      
+
       this.inputNode.connect(this.scriptProcessorNode);
       this.scriptProcessorNode.connect(this.inputAudioContext.destination);
       this.isRecording = true;
@@ -801,8 +792,8 @@ export class GdmLiveAudio extends LitElement {
             </div>
             ${this.selectedPersonaId === 'translator' ? html`
               <div class="lang-grid">
-                <div class="field"><label>Your Language</label><select id="langASelect">${LANGUAGES.map(l => html`<option value="${l.code}" ?selected=${this.langA === l.code}>${l.name}</option>`)}</select></div>
-                <div class="field"><label>Their Language</label><select id="langBSelect">${LANGUAGES.map(l => html`<option value="${l.code}" ?selected=${this.langB === l.code}>${l.name}</option>`)}</select></div>
+                <div class="field"><label>Your Language</label><select id="langASelect">${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langA === l.code}>${l.name}</option>`)}</select></div>
+                <div class="field"><label>Their Language</label><select id="langBSelect">${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langB === l.code}>${l.name}</option>`)}</select></div>
               </div>
             ` : ''}
             <div class="field"><label>Instructions</label><textarea id="promptTextarea" .value=${this.systemPrompt}></textarea></div>
