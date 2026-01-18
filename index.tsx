@@ -246,289 +246,257 @@ export class GdmLiveAudio extends LitElement {
 
   static styles = css`
     :host {
-      --bg-gradient: radial-gradient(circle at 50% 50%, #f8f9fa 0%, #e9ecef 100%);
-      --text-color: #202124;
-      --control-bg: rgba(255, 255, 255, 0.9);
-      --control-border: rgba(0, 0, 0, 0.1);
-      --control-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      --icon-color: #495057;
-      --status-color: #6c757d;
-      --accent-color: #1a73e8;
-      --modal-bg: rgba(255, 255, 255, 0.98);
-      --danger-color: #d93025;
-      
-      --user-blue: #1a73e8;
-      --user-blue-soft: rgba(26, 115, 232, 0.1);
-      --agent-purple: #9333ea;
-      --agent-purple-soft: rgba(147, 51, 234, 0.1);
-      --transcription-text-color: #ffffff;
-      --translation-text-color: #f3e8ff;
-      --pos-color: #4ade80;
-      --neg-color: #f87171;
-      --neu-color: #60a5fa;
+      --bg-color: #f8f9fa;
+      --text-color: #2c3e50;
+      --card-bg: #ffffff;
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --accent-color: #ff5722; /* Eburon Vibrant Accent */
+      --secondary-color: #6c757d;
+      --nav-bg: #ffffff;
+      --fab-bg: #2d2d2d;
+      --user-blue: #3498db;
+      --agent-purple: #9b59b6;
+      --pos-color: #27ae60;
+      --neg-color: #e74c3c;
+      --neu-color: #3498db;
       
       display: flex;
       flex-direction: column;
       width: 100vw;
       height: 100vh;
-      background: var(--bg-gradient);
+      background: var(--bg-color);
       color: var(--text-color);
-      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      font-family: 'Outfit', 'Inter', sans-serif;
       overflow: hidden;
       position: relative;
-      transition: all 0.5s ease;
-    }
-
-    :host([dark]) {
-      --bg-gradient: radial-gradient(circle at 50% 50%, #1a1c1e 0%, #0a0b0c 100%);
-      --text-color: #f1f3f4;
-      --control-bg: rgba(32, 33, 36, 0.9);
-      --control-border: rgba(255, 255, 255, 0.15);
-      --control-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      --icon-color: #dee2e6;
-      --status-color: #adb5bd;
-      --accent-color: #8ab4f8;
-      --modal-bg: rgba(32, 33, 36, 1);
-      
-      --user-blue: #8ab4f8;
-      --user-blue-soft: rgba(138, 180, 248, 0.15);
-      --agent-purple: #c084fc;
-      --agent-purple-soft: rgba(192, 132, 252, 0.15);
     }
 
     header {
       display: flex;
-      justify-content: space-between;
-      padding: 0 40px;
-      height: 90px;
-      display: flex;
       align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--control-border);
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: transparent;
       z-index: 150;
     }
 
-    h1 {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text-color);
-      letter-spacing: -0.02em;
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      width: 48px;
+    }
+
+    .header-center h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #000;
       margin: 0;
     }
 
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #eee;
+      overflow: hidden;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     .transcription-viewport {
-      position: fixed;
-      bottom: 120px;
-      left: 0;
-      right: 0;
-      height: 250px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 24px 120px 24px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      overflow: hidden;
-      padding: 20px;
-      pointer-events: none;
-      z-index: 100;
-      mask-image: linear-gradient(to top, black 80%, transparent 100%);
+      gap: 20px;
     }
 
     .transcription-container {
-      max-width: 900px;
-      width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      scroll-behavior: smooth;
-      pointer-events: auto;
+      gap: 24px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
     .segment {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--card-shadow);
       display: flex;
       flex-direction: column;
-      align-self: center;
-      max-width: 90%;
-      padding: 16px 24px;
-      border-radius: 12px;
-      font-size: 1.25rem;
-      line-height: 1.4;
-      font-weight: 500;
-      text-align: center;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(10px);
-      color: white;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      animation: subtitle-in 0.4s ease-out forwards;
-      border: 1px solid rgba(255,255,255,0.1);
+      gap: 16px;
+      transition: transform 0.2s ease;
+      position: relative;
     }
 
-    @keyframes subtitle-in {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .segment:active {
+      transform: scale(0.98);
     }
 
-    .segment-user {
-      border-left: 4px solid var(--user-blue);
+    .segment-text {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #333;
+      font-weight: 400;
     }
 
-    .segment-agent {
-      border-left: 4px solid var(--agent-purple);
-      color: #f3e8ff;
-    }
-
-    .interim {
-      opacity: 0.8;
-      background: rgba(0, 0, 0, 0.6);
-    }
-
-    .segment-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      opacity: 0.6;
-      color: white;
+    .segment-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
     }
 
-    .lang-badge {
-      font-size: 0.6rem;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 8px;
-      text-transform: uppercase;
+    .lang-info {
+      font-size: 13px;
+      color: var(--secondary-color);
+      font-weight: 500;
     }
 
-    .gender-badge {
-      font-size: 0.6rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 8px;
-      text-transform: uppercase;
-      font-weight: bold;
+    .segment-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
     }
 
-    .gender-male { background: rgba(52, 152, 219, 0.3); color: #3498db; }
-    .gender-female { background: rgba(155, 89, 182, 0.3); color: #9b59b6; }
+    .action-icon {
+      width: 20px;
+      height: 20px;
+      fill: #ccd1d9;
+      cursor: pointer;
+      transition: fill 0.2s ease;
+    }
+
+    .action-icon:hover {
+      fill: var(--accent-color);
+    }
+
+    .action-icon.active {
+      fill: var(--accent-color);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: var(--nav-bg);
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 140;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #ccd1d9;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .nav-item.active {
+      color: var(--accent-color);
+    }
+
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .fab-container {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 150;
+    }
+
+    .mic-fab {
+      width: 72px;
+      height: 72px;
+      background: var(--fab-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .mic-fab:active {
+      transform: scale(0.9);
+    }
+
+    .mic-fab svg {
+      width: 32px;
+      height: 32px;
+      fill: #ffaa33;
+    }
+
+    .mic-fab.active {
+      background: var(--accent-color);
+    }
+
+    .mic-fab.active svg {
+      fill: white;
+    }
+
+    /* Subtitle style overrides for active turn if needed */
+    .interim {
+      opacity: 0.7;
+    }
 
     .transcription-word {
       display: inline-block;
       margin-right: 0.25em;
-      opacity: 0;
-      animation: reveal-word 0.3s ease-out forwards;
-      animation-delay: calc(var(--word-index) * 0.05s);
     }
 
-    .sentiment-positive .transcription-word {
-      color: var(--pos-color);
-      text-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
-    }
+    .sentiment-positive .transcription-word { color: var(--pos-color); }
+    .sentiment-negative .transcription-word { color: var(--neg-color); }
+    .sentiment-neutral .transcription-word { color: var(--neu-color); }
 
-    .sentiment-negative .transcription-word {
-      color: var(--neg-color);
-      text-shadow: 0 0 8px rgba(248, 113, 113, 0.2);
-    }
-
-    .sentiment-neutral .transcription-word {
-      color: var(--neu-color);
-      text-shadow: 0 0 8px rgba(96, 165, 250, 0.2);
-    }
-
-    @keyframes reveal-word {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    #status {
-      position: absolute;
-      bottom: 20px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: 12px;
-      color: var(--status-color);
-      pointer-events: none;
-      z-index: 50;
-      background: linear-gradient(transparent, var(--bg-gradient));
-      padding-top: 40px;
-    }
-
-    .controls {
-      z-index: 100;
-      position: absolute;
-      bottom: 60px;
+    .status-toast {
+      position: fixed;
+      top: 100px;
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
-      align-items: center;
+      background: rgba(0,0,0,0.7);
+      color: white;
       padding: 8px 16px;
-      background: var(--control-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 40px;
-      box-shadow: var(--control-shadow);
-      border: 1px solid var(--control-border);
-      gap: 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      z-index: 300;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
 
-      button {
-        outline: none;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        width: 42px;
-        height: 42px;
-        transition: all 0.2s ease;
-
-        .visualizer {
-          position: absolute;
-          inset: -4px;
-          border-radius: 50%;
-          border: 2px solid transparent;
-          pointer-events: none;
-          transition: transform 0.1s ease;
-        }
-
-        &.active-audio .visualizer {
-          border-color: currentColor;
-          opacity: 0.3;
-        }
-
-        &:hover { background: rgba(0, 0, 0, 0.05); }
-        &:active { transform: scale(0.95); }
-
-        svg { fill: var(--icon-color); width: 22px; height: 22px; }
-        &.muted svg { fill: var(--danger-color); }
-      }
-
-      button#startButton {
-        background: var(--user-blue);
-        svg { fill: white; }
-        &:hover { filter: brightness(1.1); }
-      }
-
-      button#stopButton {
-        background: #202124;
-        svg { fill: white; }
-      }
-
-      .divider { width: 1px; height: 24px; background: var(--control-border); }
+    .status-toast.visible {
+      opacity: 1;
     }
 
     .settings-modal {
       position: fixed;
       inset: 0;
-      z-index: 200;
+      z-index: 400;
       background: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
@@ -537,29 +505,27 @@ export class GdmLiveAudio extends LitElement {
     }
 
     .settings-content {
-      background: var(--modal-bg);
+      background: #fff;
       width: 90%;
       max-width: 500px;
       max-height: 85vh;
       overflow-y: auto;
       padding: 32px;
       border-radius: 32px;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
 
-    h2 { margin: 0; font-size: 22px; font-weight: 600; }
     .field { display: flex; flex-direction: column; gap: 8px; }
     label { font-size: 13px; font-weight: 600; opacity: 0.7; }
     
     textarea, select {
       padding: 14px;
       border-radius: 16px;
-      border: 1px solid var(--control-border);
-      background: rgba(0, 0, 0, 0.02);
-      color: var(--text-color);
+      border: 1px solid #f0f0f0;
+      background: #f8f9fa;
+      color: #333;
       font-size: 14px;
       outline: none;
     }
@@ -568,11 +534,10 @@ export class GdmLiveAudio extends LitElement {
       display: flex;
       justify-content: flex-end;
       gap: 12px;
-      margin-top: 10px;
     }
 
     .btn-save {
-      background: var(--user-blue);
+      background: var(--accent-color);
       color: white;
       border: none;
       padding: 12px 24px;
@@ -582,14 +547,6 @@ export class GdmLiveAudio extends LitElement {
     }
 
     .btn-cancel {
-      background: transparent;
-      color: var(--status-color);
-      border: 1px solid var(--control-border);
-      padding: 12px 24px;
-      border-radius: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
   `;
 
   constructor() {
@@ -1039,87 +996,139 @@ export class GdmLiveAudio extends LitElement {
 
   render() {
     const allSegments = [...this.transcriptionHistory, ...this.currentTurnSegments];
+
     return html`
+      <div class="status-toast ${this.status || this.error ? 'visible' : ''}">
+        ${this.status || this.error}
+      </div>
+
       <header>
-        <h1>Neighborly Translator</h1>
+        <div class="header-left">
+          <svg class="action-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        </div>
+        <div class="header-center">
+          <h1>Translation history</h1>
+        </div>
+        <div class="header-right">
+          <div class="avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Miles" alt="Avatar">
+          </div>
+        </div>
       </header>
 
       <div class="transcription-viewport">
         <div class="transcription-container">
           ${allSegments.map((segment) => html`
-            <div class="segment segment-${segment.type} ${segment.isInterim ? 'interim' : ''} sentiment-${segment.sentiment || 'neutral'}">
-              <div class="segment-label">
-                ${segment.type}
-                ${segment.language ? html`<span class="lang-badge">${segment.language}</span>` : ''}
-                ${segment.speaker !== undefined ? html`<span class="lang-badge">S${segment.speaker}</span>` : ''}
-                ${segment.gender ? html`<span class="gender-badge gender-${segment.gender}">${segment.gender}</span>` : ''}
-              </div>
+            <div class="segment sentiment-${segment.sentiment || 'neutral'} ${segment.isInterim ? 'interim' : ''}">
               <div class="segment-text">
-                ${segment.text.split(' ').map((word, i) => html`<span class="transcription-word" style="--word-index: ${i}">${word}</span>`)}
+                ${segment.text}
+              </div>
+              <div class="segment-footer">
+                <div class="lang-info">
+                  ${this.getLanguageLabel(segment)}
+                </div>
+                <div class="segment-actions">
+                  <svg class="action-icon" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg>
+                  <svg class="action-icon" viewBox="0 0 24 24" @click=${() => this.speakText(segment.text, segment.gender)}><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </div>
               </div>
             </div>
           `)}
         </div>
       </div>
 
-      <div class="controls">
-        <button title="Toggle Mic" @click=${this.toggleMic} 
-          class="${this.isMicMuted ? 'muted' : ''} ${this.micLevel > 0.05 ? 'active-audio' : ''}" 
-          style="opacity: ${this.isRecording ? '1' : '0.4'}; color: var(--user-blue)">
-          <div class="visualizer" style="transform: scale(${1 + this.micLevel * 1.5})"></div>
-          ${this.isMicMuted ? html`<svg viewBox="0 0 24 24"><path d="M19.73 17.3L18.4 15.97c.36-.61.6-1.28.6-2h-2c0 .4-.1.79-.28 1.14l-1.42-1.42c.42-.4.7-.96.7-1.59v-6c0-1.66-1.34-3-3-3s-3 1.34-3 3v.14L3.7 3.7c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l16.03 16.03c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41zM9 5c0-1.66 1.34-3 3-3s3 1.34 3 3v6c0 .17-.03.34-.07.5l-5.93-5.93V5zM5 11h2c0 1.34.46 2.57 1.22 3.54L6.78 16c-1.12-1.39-1.78-3.12-1.78-5zM11 17.92v3.08h2v-3.08c3.39-.49 6-3.39 6-6.92h-2c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92z"/></svg>` : html`<svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>`}
-        </button>
-        <button title="Toggle Speaker" @click=${this.toggleSpeaker} 
-          class="${this.isSpeakerMuted ? 'muted' : ''} ${this.speakerLevel > 0.05 ? 'active-audio' : ''}"
-          style="color: var(--agent-purple)">
-          <div class="visualizer" style="transform: scale(${1 + this.speakerLevel * 1.5})"></div>
-          ${this.isSpeakerMuted ? html`<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>` : html`<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`}
-        </button>
-        <div class="divider"></div>
-        <button @click=${this.toggleDarkMode}>${this.isDarkMode ? html`<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L17.3 15.9l1.06 1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>` : html`<svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>`}</button>
-        <button id="startButton" @click=${this.startRecording} style="display: ${this.isRecording ? 'none' : 'flex'}"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-        <button id="stopButton" @click=${this.stopRecording} style="display: ${this.isRecording ? 'flex' : 'none'}"><svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg></button>
-        <button @click=${this.toggleSettings}><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></button>
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24"><path d="M12.85 4.51C12.44 2.8 11.56 2.8 11.15 4.51L9.62 10.87H14.38L12.85 4.51ZM18.5 22L17.5 19H12V14H17.5L18.5 11H21.5L20.5 14H24L23 11H20.5L19.5 14H14V19H19.5L20.5 22H18.5ZM13.5 14H10.5L9.5 11H6.5L7.5 14H3.5L2.5 11H0L1 14H3.5L4.5 17H0.5L1.5 20H4L5 17H9.5L10.5 20H13L12 17H9.5L8.5 14H11.5L12.5 17H13.5z"/></svg>
+        </div>
+        <div class="nav-item">
+          <div style="width: 72px;"></div>
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        </div>
+        <div class="nav-item" @click=${this.toggleSettings}>
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+        </div>
       </div>
 
-      ${this.isSettingsOpen ? html`
-        <div class="settings-modal" @click=${this.toggleSettings}>
-          <div class="settings-content" @click=${(e: Event) => e.stopPropagation()}>
-            <h2>App Settings</h2>
-            <div class="field">
-              <label>Persona</label>
-              <select id="personaSelect" @change=${this.onPersonaChange}>
-                ${PERSONA_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedPersonaId === p.id}>${p.name}</option>`)}
-              </select>
-            </div>
-            ${this.selectedPersonaId === 'translator' ? html`
-              <div class="lang-grid">
-                <div class="field"><label>Your Language</label><select id="langASelect">${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langA === l.code}>${l.name}</option>`)}</select></div>
-                <div class="field"><label>Their Language</label><select id="langBSelect">${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langB === l.code}>${l.name}</option>`)}</select></div>
-              </div>
-            ` : ''}
-            <div class="field"><label>Instructions</label><textarea id="promptTextarea" .value=${this.systemPrompt}></textarea></div>
-            <div class="field">
-              <label>Gemini Voice</label>
-              <select id="voiceSelect">${VOICE_MAP.map(v => html`<option value="${v.value}" ?selected=${this.selectedVoice === v.value}>${v.name}</option>`)}</select>
-            </div>
-            <div class="field">
-              <label>Translation Provider</label>
-              <select id="providerSelect">${PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedProvider === p.id}>${p.name}</option>`)}</select>
-            </div>
-            <div class="field">
-              <label>STT Provider</label>
-              <select id="sttProviderSelect">${STT_PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedSttProvider === p.id}>${p.name}</option>`)}</select>
-            </div>
-            <div class="modal-actions">
-              <button class="btn-cancel" @click=${this.toggleSettings}>Cancel</button>
-              <button class="btn-save" @click=${this.saveSettings}>Apply Settings</button>
-            </div>
+      <div class="fab-container">
+        <button class="mic-fab ${this.isRecording ? 'active' : ''}" @click=${this.isRecording ? this.stopRecording : this.startRecording}>
+          <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        </button>
+      </div>
+
+      ${this.renderSettings()}
+    `;
+  }
+
+  private getLanguageLabel(segment: TranscriptionSegment) {
+    if (segment.type === 'agent') {
+      const source = this.langA;
+      const target = segment.language || this.langB;
+      return `${this.getLangName(source)} to ${this.getLangName(target)}`;
+    }
+    return `Detected: ${this.getLangName(segment.language || this.langA)}`;
+  }
+
+  private getLangName(code: string) {
+    return LANGUAGE_OPTIONS.find(l => l.code === code)?.name.split(' (')[0] || code;
+  }
+
+  private speakText(text: string, gender?: 'male' | 'female') {
+    if (this.selectedProvider === 'ollama-cartesia') {
+      this.speakWithCartesia(text, gender);
+    } else {
+      // For Gemini, we might need a separate TTS helper if not in active session
+      // For now, we reuse speakWithCartesia as a fallback or if configured
+      this.speakWithCartesia(text, gender);
+    }
+  }
+
+  private renderSettings() {
+    if (!this.isSettingsOpen) return html``;
+    return html`
+      <div class="settings-modal" @click=${this.toggleSettings}>
+        <div class="settings-content" @click=${(e: Event) => e.stopPropagation()}>
+          <header style="padding: 0; height: auto; background: transparent; border: none; justify-content: flex-start; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Settings</h2>
+          </header>
+          
+          <div class="field">
+            <label>Miles Persona</label>
+            <select id="personaSelect" @change=${this.onPersonaChange}>
+              ${PERSONA_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedPersonaId === p.id}>${p.name}</option>`)}
+            </select>
+          </div>
+
+          <div class="field">
+            <label>System Instructions</label>
+            <textarea id="promptTextarea" rows="6">${this.systemPrompt}</textarea>
+          </div>
+
+          <div class="field">
+            <label>Language A (Source)</label>
+            <select id="langASelect">
+              ${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langA === l.code}>${l.name}</option>`)}
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Language B (Target)</label>
+            <select id="langBSelect">
+              ${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langB === l.code}>${l.name}</option>`)}
+            </select>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-cancel" @click=${this.toggleSettings}>Cancel</button>
+            <button class="btn-save" @click=${this.saveSettings}>Save Changes</button>
           </div>
         </div>
-      ` : ''}
-
-      <div id="status">${this.error ? html`<span style="color: var(--danger-color); font-weight: 600;">${this.error}</span>` : this.status}</div>
+      </div>
     `;
   }
 }
