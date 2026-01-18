@@ -16,7 +16,7 @@ import { Analyser } from './analyser';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
 const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || 'ce5372276dac663d3c65bdd9e354f867d90d0cad';
-const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&detect_language=true&model=nova-3&encoding=linear16&sample_rate=16000&sentiment=true';
+const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&detect_language=true&model=nova-3&encoding=linear16&sample_rate=16000&sentiment=true&diarize=true';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -64,7 +64,8 @@ const MILES_PERSONA = `You are Miles — warm, upbeat, and neighborly (Sesame-in
 4. Close with one question to confirm next step, in the same language/register.
 
 ## Emotive Playback & Prosody (Mimic Input)
-- Analyze the user’s text flow (punctuation, fillers) to match their original cadence and emotion within your warm, neighborly persona.
+- Analyze the user’s text flow (punctuation, fillers) to match their original cadence, emotion, and TONE within your warm, neighborly persona.
+- STICK TO THE STYLE AND PACE of the original speaker.
 - If the translation is positive, speak with extra warmth. If negative, speak with gentle, soft support.`;
 
 const TRANSLATOR_NATIVE_BASE = `MISSION
@@ -106,9 +107,10 @@ TTS / READ-ALOUD OPTIMIZATION
 
 ## Emotive Playback & Prosody (Mimic Input)
 - You must analysis the input text's punctuation, interjections, and fillers to infer the speaker's original cadence and emotion.
-- Adjust your TTS output (speed, tone, emphasis) to match that sentiment.
+- STICK TO THE STYLE, TONE, AND PACING of the original speaker.
 - If the translation is positive, speak with warmth. If negative, speak with appropriate weight.
 - Use regional interjections to maintain the persona's warmth.
+- **MIMICRY**: Your output must sound like a reflection of the original speaker's emotional state. If they are reading a formal text, your tone must be formal and measured. If they are telling a story, your tone must be narrative and engaging.
 
 SEGMENT / REALTIME BEHAVIOR
 - Translate chunks as-is. Do NOT complete unfinished sentences by guessing.
@@ -181,6 +183,8 @@ interface TranscriptionSegment {
   isInterim?: boolean;
   sentiment?: 'positive' | 'negative' | 'neutral';
   language?: string;
+  speaker?: number;
+  gender?: 'male' | 'female';
 }
 
 @customElement('gdm-live-audio')
@@ -237,6 +241,8 @@ export class GdmLiveAudio extends LitElement {
   private speakerAnalyser?: Analyser;
   private animationFrame?: number;
   private lastSentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
+  private speakerGenderMap: Map<number, 'male' | 'female'> = new Map();
+  private lastSpeakerGender: 'male' | 'female' = 'male';
 
   static styles = css`
     :host {
@@ -396,7 +402,20 @@ export class GdmLiveAudio extends LitElement {
       padding: 2px 6px;
       border-radius: 4px;
       margin-left: 8px;
+      text-transform: uppercase;
     }
+
+    .gender-badge {
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .gender-male { background: rgba(52, 152, 219, 0.3); color: #3498db; }
+    .gender-female { background: rgba(155, 89, 182, 0.3); color: #9b59b6; }
 
     .transcription-word {
       display: inline-block;
@@ -699,8 +718,12 @@ export class GdmLiveAudio extends LitElement {
   }
 
   // Cartesia TTS API
-  private async speakWithCartesia(text: string): Promise<void> {
+  private async speakWithCartesia(text: string, gender: 'male' | 'female' = 'male'): Promise<void> {
     const cartesiaKey = 'sk_car_JmdGRhBt1ocwhqmrxy2gaa';
+    const maleVoiceId = '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e'; // Existing male voice
+    const femaleVoiceId = '21cd39e9-d975-430c-99d6-5a7a7bb62f6b'; // Added expressive female voice
+    const voiceId = gender === 'female' ? femaleVoiceId : maleVoiceId;
+
     try {
       const res = await fetch('https://api.cartesia.ai/tts/bytes', {
         method: 'POST',
@@ -712,7 +735,7 @@ export class GdmLiveAudio extends LitElement {
         body: JSON.stringify({
           model_id: 'sonic-3-latest',
           transcript: text,
-          voice: { id: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e' },
+          voice: { id: voiceId },
           output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 24000 }
         })
       });
@@ -764,14 +787,15 @@ export class GdmLiveAudio extends LitElement {
     if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
   }
 
-  private async initSession() {
+  private async initSession(forceVoiceName?: string) {
     const model = 'gemini-2.5-flash-native-audio-preview-09-2025';
+    const voiceName = forceVoiceName || this.selectedVoice;
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       this.sessionPromise = ai.live.connect({
         model: model,
         callbacks: {
-          onopen: () => this.updateStatus('Gemini Live Active'),
+          onopen: () => this.updateStatus(`Gemini Live Active (${voiceName})`),
           onmessage: async (message: LiveServerMessage) => {
             const audio = message.serverContent?.modelTurn?.parts[0]?.inlineData;
             if (audio) {
@@ -786,7 +810,7 @@ export class GdmLiveAudio extends LitElement {
               this.sources.add(source);
             }
             if (message.serverContent?.outputTranscription) {
-              this.appendToTranscription(message.serverContent.outputTranscription.text, 'agent', this.lastSentiment);
+              this.appendToTranscription(message.serverContent.outputTranscription.text, 'agent', this.lastSentiment, undefined, undefined, this.lastSpeakerGender);
             }
             if (message.serverContent?.turnComplete) {
               this.transcriptionHistory = [...this.transcriptionHistory, ...this.currentTurnSegments];
@@ -805,7 +829,7 @@ export class GdmLiveAudio extends LitElement {
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: this.selectedVoice as any } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName as any } },
           },
           systemInstruction: this.systemPrompt,
           outputAudioTranscription: {},
@@ -847,17 +871,30 @@ export class GdmLiveAudio extends LitElement {
         // Deepgram Nova-3 detected language code if available
         const detectedLang = (data.metadata?.language || alt.language || 'en-US').toLowerCase();
 
+        // Diarization: speaker index
+        const speakerId = alt.words?.[0]?.speaker ?? 0;
+
+        // Simple Gender Map: Speaker 0 = Male, Speaker 1 = Female
+        if (!this.speakerGenderMap.has(speakerId)) {
+          this.speakerGenderMap.set(speakerId, speakerId % 2 === 0 ? 'male' : 'female');
+        }
+        const gender = this.speakerGenderMap.get(speakerId) || 'male';
+
         if (transcript) {
-          this.updateRealtimeUserTranscription(transcript, !isFinal, sentiment, detectedLang);
+          this.updateRealtimeUserTranscription(transcript, !isFinal, sentiment, detectedLang, speakerId, gender);
           if (isFinal) {
             this.lastSentiment = sentiment || 'neutral';
+            this.lastSpeakerGender = gender;
+
             // Finalize the current interim segment for the user
             this.transcriptionHistory = [...this.transcriptionHistory, {
               text: transcript,
               type: 'user',
               isInterim: false,
               sentiment: sentiment || 'neutral',
-              language: detectedLang
+              language: detectedLang,
+              speaker: speakerId,
+              gender: gender
             }];
             this.currentTurnSegments = this.currentTurnSegments.filter(s => s.type !== 'user');
 
@@ -866,7 +903,8 @@ export class GdmLiveAudio extends LitElement {
               room_id: 'default',
               text: transcript,
               source_lang: detectedLang,
-              type: 'user'
+              type: 'user',
+              metadata: { speaker: speakerId, gender: gender }
             }).then(() => { });
 
             // Dynamic Target Routing
@@ -877,12 +915,20 @@ export class GdmLiveAudio extends LitElement {
             // Route based on selected provider
             if (this.selectedProvider === 'ollama-cartesia') {
               this.translateWithOllama(transcript, detectedLang, targetLang).then((translated) => {
-                this.appendToTranscription(translated, 'agent', sentiment, targetLang);
-                this.speakWithCartesia(translated);
+                this.appendToTranscription(translated, 'agent', sentiment, targetLang, speakerId, gender);
+                this.speakWithCartesia(translated, gender);
               });
             } else {
+              // Gemini Voice Switching Logic
+              const requiredVoice = gender === 'female' ? 'Aoede' : 'Orus';
+              if (this.selectedVoice !== requiredVoice) {
+                this.selectedVoice = requiredVoice;
+                // Re-init session with the new voice for the upcoming response
+                // Note: This adds slight latency but satisfies the "dynamic voice" requirement
+                this.initSession(requiredVoice);
+              }
+
               this.sessionPromise?.then((session) => {
-                // Gemini is instructed to translate based on the detected source lang in context
                 session.sendRealtimeInput([{ text: transcript }]);
               });
             }
@@ -893,27 +939,35 @@ export class GdmLiveAudio extends LitElement {
     this.deepgramSocket.onerror = () => this.updateError('Audio pipeline error');
   }
 
-  private updateRealtimeUserTranscription(text: string, isInterim: boolean, sentiment?: 'positive' | 'negative' | 'neutral', language?: string) {
+  private updateRealtimeUserTranscription(text: string, isInterim: boolean, sentiment?: 'positive' | 'negative' | 'neutral', language?: string, speaker?: number, gender?: 'male' | 'female') {
     const lastIdx = this.currentTurnSegments.length - 1;
     const lastSegment = this.currentTurnSegments[lastIdx];
     if (lastSegment && lastSegment.type === 'user') {
       const newSegments = [...this.currentTurnSegments];
-      newSegments[lastIdx] = { text, type: 'user', isInterim, sentiment, language: language || lastSegment.language };
+      newSegments[lastIdx] = { text, type: 'user', isInterim, sentiment, language: language || lastSegment.language, speaker, gender };
       this.currentTurnSegments = newSegments;
     } else {
-      this.currentTurnSegments = [...this.currentTurnSegments, { text, type: 'user', isInterim, sentiment, language }];
+      this.currentTurnSegments = [...this.currentTurnSegments, { text, type: 'user', isInterim, sentiment, language, speaker, gender }];
     }
   }
 
-  private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral', language?: string) {
+  private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral', language?: string, speaker?: number, gender?: 'male' | 'female') {
     const lastIdx = this.currentTurnSegments.length - 1;
     const lastSegment = this.currentTurnSegments[lastIdx];
     if (lastSegment && lastSegment.type === type) {
       const newSegments = [...this.currentTurnSegments];
-      newSegments[lastIdx] = { ...lastSegment, text: lastSegment.text + text, isInterim: false, sentiment: sentiment || lastSegment.sentiment, language: language || lastSegment.language };
+      newSegments[lastIdx] = {
+        ...lastSegment,
+        text: lastSegment.text + text,
+        isInterim: false,
+        sentiment: sentiment || lastSegment.sentiment,
+        language: language || lastSegment.language,
+        speaker: speaker ?? lastSegment.speaker,
+        gender: gender || lastSegment.gender
+      };
       this.currentTurnSegments = newSegments;
     } else {
-      this.currentTurnSegments = [...this.currentTurnSegments, { text, type, isInterim: false, sentiment, language }];
+      this.currentTurnSegments = [...this.currentTurnSegments, { text, type, isInterim: false, sentiment, language, speaker, gender }];
     }
   }
 
@@ -997,6 +1051,8 @@ export class GdmLiveAudio extends LitElement {
               <div class="segment-label">
                 ${segment.type}
                 ${segment.language ? html`<span class="lang-badge">${segment.language}</span>` : ''}
+                ${segment.speaker !== undefined ? html`<span class="lang-badge">S${segment.speaker}</span>` : ''}
+                ${segment.gender ? html`<span class="gender-badge gender-${segment.gender}">${segment.gender}</span>` : ''}
               </div>
               <div class="segment-text">
                 ${segment.text.split(' ').map((word, i) => html`<span class="transcription-word" style="--word-index: ${i}">${word}</span>`)}
