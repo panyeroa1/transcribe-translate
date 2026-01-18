@@ -306,83 +306,91 @@ export class GdmLiveAudio extends LitElement {
     }
 
     .transcription-viewport {
-      flex: 1;
+      position: fixed;
+      bottom: 120px;
+      left: 0;
+      right: 0;
+      height: 250px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: flex-end;
       overflow: hidden;
-      padding: 10px 0;
+      padding: 20px;
+      pointer-events: none;
+      z-index: 100;
+      mask-image: linear-gradient(to top, black 80%, transparent 100%);
     }
 
     .transcription-container {
-      max-width: 800px;
+      max-width: 900px;
       width: 100%;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      padding: 20px;
+      gap: 16px;
       scroll-behavior: smooth;
-    }
-
-    .transcription-container::-webkit-scrollbar {
-      width: 6px;
-    }
-    .transcription-container::-webkit-scrollbar-thumb {
-      background: var(--control-border);
-      border-radius: 10px;
+      pointer-events: auto;
     }
 
     .segment {
       display: flex;
       flex-direction: column;
-      max-width: 85%;
-      padding: 12px 18px;
-      border-radius: 20px;
-      font-size: 1rem;
-      line-height: 1.5;
-      animation: bubble-in 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      align-self: center;
+      max-width: 90%;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      font-weight: 500;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      color: white;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      animation: subtitle-in 0.4s ease-out forwards;
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
-    @keyframes bubble-in {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
+    @keyframes subtitle-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .segment-user {
-      align-self: flex-start;
-      background: var(--user-blue-soft);
-      color: var(--transcription-text-color);
-      border-bottom-left-radius: 4px;
-      border: 1px solid rgba(26, 115, 232, 0.1);
+      border-left: 4px solid var(--user-blue);
     }
 
     .segment-agent {
-      align-self: flex-end;
-      background: var(--agent-purple-soft);
-      color: var(--translation-text-color);
-      border-bottom-right-radius: 4px;
-      border: 1px solid rgba(147, 51, 234, 0.1);
+      border-left: 4px solid var(--agent-purple);
+      color: #f3e8ff;
     }
 
     .interim {
-      opacity: 0.6;
-      filter: blur(0.5px);
+      opacity: 0.8;
+      background: rgba(0, 0, 0, 0.6);
     }
 
     .segment-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-bottom: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      opacity: 0.8;
+      letter-spacing: 0.1em;
+      opacity: 0.6;
+      color: white;
     }
 
     .transcription-word {
       display: inline-block;
-      margin-right: 0.2em;
+      margin-right: 0.25em;
+      opacity: 0;
+      animation: reveal-word 0.3s ease-out forwards;
+      animation-delay: calc(var(--word-index) * 0.05s);
+    }
+
+    @keyframes reveal-word {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     #status {
@@ -683,7 +691,7 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private async initSession() {
-    const model = 'gemini-2.5-flash-native-audio-preview-12-2025';
+    const model = 'gemini-2.5-flash-native-audio-preview-09-2025';
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       this.sessionPromise = ai.live.connect({
@@ -907,7 +915,7 @@ export class GdmLiveAudio extends LitElement {
             <div class="segment segment-${segment.type} ${segment.isInterim ? 'interim' : ''}">
               <div class="segment-label">${segment.type}</div>
               <div class="segment-text">
-                ${segment.text.split(' ').map(word => html`<span class="transcription-word">${word}</span>`)}
+                ${segment.text.split(' ').map((word, i) => html`<span class="transcription-word" style="--word-index: ${i}">${word}</span>`)}
               </div>
             </div>
           `)}
