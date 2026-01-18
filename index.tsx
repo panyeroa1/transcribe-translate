@@ -786,8 +786,17 @@ export class GdmLiveAudio extends LitElement {
               this.currentTurnSegments = [];
             }
           },
-          onerror: (e: ErrorEvent) => this.updateError(e.message || 'Gemini Error'),
-          onclose: (e: CloseEvent) => this.updateStatus('Session Closed'),
+          onerror: (e) => {
+            console.error('Gemini error:', e);
+            this.updateError('AI service error - attempting recovery');
+            setTimeout(() => this.initSession(), 2000);
+          },
+          onclose: () => {
+            if (this.isRecording) {
+              console.warn('Gemini session closed unexpectedly, attempting recovery...');
+              setTimeout(() => this.initSession(), 1000);
+            }
+          },
         },
         config: {
           responseModalities: [Modality.AUDIO],
@@ -1006,8 +1015,17 @@ export class GdmLiveAudio extends LitElement {
         if (!this.inputDestination) this.inputDestination = this.inputAudioContext.createMediaStreamDestination();
         this.audioWorkletNode.connect(this.inputDestination);
       } catch (workletErr) {
-        console.error('AudioWorklet failed, falling back to basic connection:', workletErr);
-        // Fallback or handle appropriately
+        console.warn('AudioWorklet failed, using ScriptProcessorNode fallback:', workletErr);
+        const scriptNode = this.inputAudioContext.createScriptProcessor(4096, 1, 1);
+        scriptNode.onaudioprocess = (e) => {
+          if (this.isRecording && this.deepgramSocket?.readyState === WebSocket.OPEN) {
+            const inputData = e.inputBuffer.getChannelData(0);
+            const pcmData = this.floatTo16BitPCM(inputData);
+            this.deepgramSocket.send(pcmData);
+          }
+        };
+        this.inputNode.connect(scriptNode);
+        scriptNode.connect(this.inputAudioContext.destination);
       }
 
       this.isRecording = true;
@@ -1023,10 +1041,25 @@ export class GdmLiveAudio extends LitElement {
     this.audioWorkletNode?.disconnect();
     this.sourceNode?.disconnect();
     this.mediaStream?.getTracks().forEach(track => track.stop());
-    this.deepgramSocket?.close();
-    this.deepgramSocket = null;
+
+    if (this.deepgramSocket) {
+      this.deepgramSocket.close();
+      this.deepgramSocket = null;
+    }
+    clearInterval(this.deepgramHeartbeat);
+
     this.isUserSpeaking = false;
     this.updateStatus('Ready');
+  }
+
+  private floatTo16BitPCM(input: Float32Array): ArrayBuffer {
+    const buffer = new ArrayBuffer(input.length * 2);
+    const view = new DataView(buffer);
+    for (let i = 0; i < input.length; i++) {
+      const s = Math.max(-1, Math.min(1, input[i]));
+      view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+    return buffer;
   }
 
   private reset() {
