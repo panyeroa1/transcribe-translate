@@ -11,7 +11,7 @@ import { customElement, state, query } from 'lit/decorators.js';
 import { createClient } from '@supabase/supabase-js';
 import { createBlob, decode, decodeAudioData } from './utils';
 import { LANGUAGE_OPTIONS } from './languages';
-import './visual-2d';
+import { Analyser } from './analyser';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
@@ -187,6 +187,8 @@ export class GdmLiveAudio extends LitElement {
   @state() transcriptionHistory: TranscriptionSegment[] = [];
   @state() currentTurnSegments: TranscriptionSegment[] = [];
   @state() isUserSpeaking = false;
+  @state() private micLevel = 0;
+  @state() private speakerLevel = 0;
 
   @query('#promptTextarea') private textarea!: HTMLTextAreaElement;
   @query('#voiceSelect') private voiceSelect!: HTMLSelectElement;
@@ -216,6 +218,9 @@ export class GdmLiveAudio extends LitElement {
   private audioWorkletNode: AudioWorkletNode | null = null;
   private inputDestination: MediaStreamAudioDestinationNode | null = null;
   private sources = new Set<AudioBufferSourceNode>();
+  private micAnalyser?: Analyser;
+  private speakerAnalyser?: Analyser;
+  private animationFrame?: number;
 
   static styles = css`
     :host {
@@ -269,40 +274,23 @@ export class GdmLiveAudio extends LitElement {
     header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 12px 24px;
-      z-index: 100;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-    }
-
-    .header-left h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 500;
-      letter-spacing: -0.01em;
-      background: linear-gradient(90deg, var(--user-blue), var(--agent-purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .orb-container {
-      width: 40px;
-      height: 40px;
+      padding: 0 40px;
+      height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--control-border);
+      z-index: 150;
     }
 
-    .orb-container.speaking {
-      transform: scale(1.2);
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+      letter-spacing: -0.02em;
+      margin: 0;
     }
 
     .transcription-viewport {
@@ -429,6 +417,7 @@ export class GdmLiveAudio extends LitElement {
         border: none;
         background: transparent;
         cursor: pointer;
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -436,6 +425,20 @@ export class GdmLiveAudio extends LitElement {
         width: 42px;
         height: 42px;
         transition: all 0.2s ease;
+
+        .visualizer {
+          position: absolute;
+          inset: -4px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          pointer-events: none;
+          transition: transform 0.1s ease;
+        }
+
+        &.active-audio .visualizer {
+          border-color: currentColor;
+          opacity: 0.3;
+        }
 
         &:hover { background: rgba(0, 0, 0, 0.05); }
         &:active { transform: scale(0.95); }
@@ -687,7 +690,33 @@ export class GdmLiveAudio extends LitElement {
   private async initClient() {
     this.initAudio();
     this.outputNode.connect(this.outputAudioContext.destination);
+
+    this.micAnalyser = new Analyser(this.inputNode);
+    this.speakerAnalyser = new Analyser(this.outputNode);
+
+    this.updateLevels();
     this.initSession();
+  }
+
+  private updateLevels() {
+    if (this.micAnalyser) {
+      this.micAnalyser.update();
+      const data = this.micAnalyser.data;
+      const sum = data.reduce((a, b) => a + b, 0);
+      this.micLevel = sum / data.length / 255;
+    }
+    if (this.speakerAnalyser) {
+      this.speakerAnalyser.update();
+      const data = this.speakerAnalyser.data;
+      const sum = data.reduce((a, b) => a + b, 0);
+      this.speakerLevel = sum / data.length / 255;
+    }
+    this.animationFrame = requestAnimationFrame(() => this.updateLevels());
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
   }
 
   private async initSession() {
@@ -894,19 +923,7 @@ export class GdmLiveAudio extends LitElement {
     const allSegments = [...this.transcriptionHistory, ...this.currentTurnSegments];
     return html`
       <header>
-        <div class="header-left">
-          <h1>Neighborly Translator</h1>
-        </div>
-        <div class="header-right">
-          <div class="orb-container ${this.isUserSpeaking ? 'speaking' : ''}">
-            <gdm-live-audio-visuals-2d
-              .inputNode=${this.inputNode}
-              .outputNode=${this.outputNode}
-              .isActive=${this.isRecording}
-              .isDarkMode=${this.isDarkMode}
-            ></gdm-live-audio-visuals-2d>
-          </div>
-        </div>
+        <h1>Neighborly Translator</h1>
       </header>
 
       <div class="transcription-viewport">
@@ -923,10 +940,16 @@ export class GdmLiveAudio extends LitElement {
       </div>
 
       <div class="controls">
-        <button title="Toggle Mic" @click=${this.toggleMic} class=${this.isMicMuted ? 'muted' : ''} style="opacity: ${this.isRecording ? '1' : '0.4'}">
+        <button title="Toggle Mic" @click=${this.toggleMic} 
+          class="${this.isMicMuted ? 'muted' : ''} ${this.micLevel > 0.05 ? 'active-audio' : ''}" 
+          style="opacity: ${this.isRecording ? '1' : '0.4'}; color: var(--user-blue)">
+          <div class="visualizer" style="transform: scale(${1 + this.micLevel * 1.5})"></div>
           ${this.isMicMuted ? html`<svg viewBox="0 0 24 24"><path d="M19.73 17.3L18.4 15.97c.36-.61.6-1.28.6-2h-2c0 .4-.1.79-.28 1.14l-1.42-1.42c.42-.4.7-.96.7-1.59v-6c0-1.66-1.34-3-3-3s-3 1.34-3 3v.14L3.7 3.7c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l16.03 16.03c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41zM9 5c0-1.66 1.34-3 3-3s3 1.34 3 3v6c0 .17-.03.34-.07.5l-5.93-5.93V5zM5 11h2c0 1.34.46 2.57 1.22 3.54L6.78 16c-1.12-1.39-1.78-3.12-1.78-5zM11 17.92v3.08h2v-3.08c3.39-.49 6-3.39 6-6.92h-2c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92z"/></svg>` : html`<svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>`}
         </button>
-        <button title="Toggle Speaker" @click=${this.toggleSpeaker} class=${this.isSpeakerMuted ? 'muted' : ''}>
+        <button title="Toggle Speaker" @click=${this.toggleSpeaker} 
+          class="${this.isSpeakerMuted ? 'muted' : ''} ${this.speakerLevel > 0.05 ? 'active-audio' : ''}"
+          style="color: var(--agent-purple)">
+          <div class="visualizer" style="transform: scale(${1 + this.speakerLevel * 1.5})"></div>
           ${this.isSpeakerMuted ? html`<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>` : html`<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`}
         </button>
         <div class="divider"></div>
