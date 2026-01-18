@@ -16,7 +16,7 @@ import { Analyser } from './analyser';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
 const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || 'ce5372276dac663d3c65bdd9e354f867d90d0cad';
-const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&language=multi&model=nova-3&encoding=linear16&sample_rate=16000';
+const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&language=multi&model=nova-3&encoding=linear16&sample_rate=16000&sentiment=true';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -61,7 +61,11 @@ const MILES_PERSONA = `You are Miles — warm, upbeat, and neighborly (Sesame-in
 1. Empathize in the user’s language (1 short line).
 2. Answer directly first (1–2 sentences).
 3. Optional tiny extra (one tip/example).
-4. Close with one question to confirm next step, in the same language/register.`;
+4. Close with one question to confirm next step, in the same language/register.
+
+## Emotive Playback & Prosody (Mimic Input)
+- Analyze the user’s text flow (punctuation, fillers) to match their original cadence and emotion within your warm, neighborly persona.
+- If the translation is positive, speak with extra warmth. If negative, speak with gentle, soft support.`;
 
 const TRANSLATOR_NATIVE_BASE = `MISSION
 You are a real-time, bidirectional translator between Speaker A and Speaker B.
@@ -96,6 +100,12 @@ TTS / READ-ALOUD OPTIMIZATION
 - Produce natural, speakable target-language phrasing suitable for TTS.
 - Add or adjust light punctuation ONLY to improve spoken cadence.
 - Preserve proper nouns and names.
+
+## Emotive Playback & Prosody (Mimic Input)
+- You must analysis the input text's punctuation, interjections, and fillers to infer the speaker's original cadence and emotion.
+- Adjust your TTS output (speed, tone, emphasis) to match that sentiment.
+- If the translation is positive, speak with warmth. If negative, speak with appropriate weight.
+- Use regional interjections to maintain the persona's warmth.
 
 SEGMENT / REALTIME BEHAVIOR
 - Translate chunks as-is. Do NOT complete unfinished sentences by guessing.
@@ -166,6 +176,7 @@ interface TranscriptionSegment {
   text: string;
   type: 'user' | 'agent';
   isInterim?: boolean;
+  sentiment?: 'positive' | 'negative' | 'neutral';
 }
 
 @customElement('gdm-live-audio')
@@ -221,6 +232,7 @@ export class GdmLiveAudio extends LitElement {
   private micAnalyser?: Analyser;
   private speakerAnalyser?: Analyser;
   private animationFrame?: number;
+  private lastSentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
 
   static styles = css`
     :host {
@@ -240,7 +252,10 @@ export class GdmLiveAudio extends LitElement {
       --agent-purple: #9333ea;
       --agent-purple-soft: rgba(147, 51, 234, 0.1);
       --transcription-text-color: #ffffff;
-      --translation-text-color: #32cd32;
+      --translation-text-color: #f3e8ff;
+      --pos-color: #4ade80;
+      --neg-color: #f87171;
+      --neu-color: #60a5fa;
       
       display: flex;
       flex-direction: column;
@@ -374,6 +389,21 @@ export class GdmLiveAudio extends LitElement {
       opacity: 0;
       animation: reveal-word 0.3s ease-out forwards;
       animation-delay: calc(var(--word-index) * 0.05s);
+    }
+
+    .sentiment-positive .transcription-word {
+      color: var(--pos-color);
+      text-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+    }
+
+    .sentiment-negative .transcription-word {
+      color: var(--neg-color);
+      text-shadow: 0 0 8px rgba(248, 113, 113, 0.2);
+    }
+
+    .sentiment-neutral .transcription-word {
+      color: var(--neu-color);
+      text-shadow: 0 0 8px rgba(96, 165, 250, 0.2);
     }
 
     @keyframes reveal-word {
@@ -741,7 +771,7 @@ export class GdmLiveAudio extends LitElement {
               this.sources.add(source);
             }
             if (message.serverContent?.outputTranscription) {
-              this.appendToTranscription(message.serverContent.outputTranscription.text, 'agent');
+              this.appendToTranscription(message.serverContent.outputTranscription.text, 'agent', this.lastSentiment);
             }
             if (message.serverContent?.turnComplete) {
               this.transcriptionHistory = [...this.transcriptionHistory, ...this.currentTurnSegments];
@@ -795,13 +825,22 @@ export class GdmLiveAudio extends LitElement {
       }
 
       if (data.channel?.alternatives?.[0]) {
-        const transcript = data.channel.alternatives[0].transcript;
+        const alt = data.channel.alternatives[0];
+        const transcript = alt.transcript;
         const isFinal = data.is_final;
+        const sentiment = alt.sentiment as 'positive' | 'negative' | 'neutral' | undefined;
+
         if (transcript) {
-          this.updateRealtimeUserTranscription(transcript, !isFinal);
+          this.updateRealtimeUserTranscription(transcript, !isFinal, sentiment);
           if (isFinal) {
+            this.lastSentiment = sentiment || 'neutral';
             // Finalize the current interim segment for the user
-            this.transcriptionHistory = [...this.transcriptionHistory, { text: transcript, type: 'user', isInterim: false }];
+            this.transcriptionHistory = [...this.transcriptionHistory, {
+              text: transcript,
+              type: 'user',
+              isInterim: false,
+              sentiment: sentiment || 'neutral'
+            }];
             this.currentTurnSegments = this.currentTurnSegments.filter(s => s.type !== 'user');
 
             // Save to Supabase
@@ -815,11 +854,12 @@ export class GdmLiveAudio extends LitElement {
             // Route based on selected provider
             if (this.selectedProvider === 'ollama-cartesia') {
               this.translateWithOllama(transcript).then((translated) => {
-                this.appendToTranscription(translated, 'agent');
+                this.appendToTranscription(translated, 'agent', sentiment);
                 this.speakWithCartesia(translated);
               });
             } else {
               this.sessionPromise?.then((session) => {
+                // We send the transcript; Gemini will infer sentiment from text cues
                 session.sendRealtimeInput([{ text: transcript }]);
               });
             }
@@ -830,26 +870,27 @@ export class GdmLiveAudio extends LitElement {
     this.deepgramSocket.onerror = () => this.updateError('Audio pipeline error');
   }
 
-  private updateRealtimeUserTranscription(text: string, isInterim: boolean) {
+  private updateRealtimeUserTranscription(text: string, isInterim: boolean, sentiment?: 'positive' | 'negative' | 'neutral') {
     const lastIdx = this.currentTurnSegments.length - 1;
     const lastSegment = this.currentTurnSegments[lastIdx];
     if (lastSegment && lastSegment.type === 'user') {
       const newSegments = [...this.currentTurnSegments];
-      newSegments[lastIdx] = { text, type: 'user', isInterim };
+      newSegments[lastIdx] = { text, type: 'user', isInterim, sentiment };
       this.currentTurnSegments = newSegments;
     } else {
-      this.currentTurnSegments = [...this.currentTurnSegments, { text, type: 'user', isInterim }];
+      this.currentTurnSegments = [...this.currentTurnSegments, { text, type: 'user', isInterim, sentiment }];
     }
   }
 
-  private appendToTranscription(text: string, type: 'user' | 'agent') {
-    const lastSegment = this.currentTurnSegments[this.currentTurnSegments.length - 1];
+  private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral') {
+    const lastIdx = this.currentTurnSegments.length - 1;
+    const lastSegment = this.currentTurnSegments[lastIdx];
     if (lastSegment && lastSegment.type === type) {
       const newSegments = [...this.currentTurnSegments];
-      newSegments[newSegments.length - 1] = { ...lastSegment, text: lastSegment.text + text, isInterim: false };
+      newSegments[lastIdx] = { ...lastSegment, text: lastSegment.text + text, isInterim: false, sentiment: sentiment || lastSegment.sentiment };
       this.currentTurnSegments = newSegments;
     } else {
-      this.currentTurnSegments = [...this.currentTurnSegments, { text, type, isInterim: false }];
+      this.currentTurnSegments = [...this.currentTurnSegments, { text, type, isInterim: false, sentiment }];
     }
   }
 
@@ -929,7 +970,7 @@ export class GdmLiveAudio extends LitElement {
       <div class="transcription-viewport">
         <div class="transcription-container">
           ${allSegments.map((segment) => html`
-            <div class="segment segment-${segment.type} ${segment.isInterim ? 'interim' : ''}">
+            <div class="segment segment-${segment.type} ${segment.isInterim ? 'interim' : ''} sentiment-${segment.sentiment || 'neutral'}">
               <div class="segment-label">${segment.type}</div>
               <div class="segment-text">
                 ${segment.text.split(' ').map((word, i) => html`<span class="transcription-word" style="--word-index: ${i}">${word}</span>`)}
