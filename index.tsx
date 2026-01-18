@@ -16,7 +16,7 @@ import { Analyser } from './analyser';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
 const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || 'ce5372276dac663d3c65bdd9e354f867d90d0cad';
-const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&detect_language=true&model=nova-3&encoding=linear16&sample_rate=16000&sentiment=true&diarize=true';
+const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&model=nova-2&encoding=linear16&sample_rate=16000&sentiment=true&diarize=true';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -106,7 +106,7 @@ TTS / READ-ALOUD OPTIMIZATION
 - Preserve proper nouns and names.
 
 ## Emotive Playback & Prosody (Mimic Input)
-- You must analysis the input text's punctuation, interjections, and fillers to infer the speaker's original cadence and emotion.
+- You must analyze the input text's punctuation, interjections, and fillers to infer the speaker's original cadence and emotion.
 - STICK TO THE STYLE, TONE, AND PACING of the original speaker.
 - If the translation is positive, speak with warmth. If negative, speak with appropriate weight.
 - Use regional interjections to maintain the persona's warmth.
@@ -847,7 +847,7 @@ export class GdmLiveAudio extends LitElement {
       return;
     }
     // Dedicated STT endpoint to keep input processing independent of TTS playback.
-    const url = `${DEEPGRAM_ENDPOINT}&channels=1&interim_results=true&smart_format=true&filler_words=true&no_delay=true&vad_events=true`;
+    const url = `${DEEPGRAM_ENDPOINT}&channels=1&language=${this.langA}&interim_results=true&smart_format=true&filler_words=true&no_delay=true&vad_events=true`;
 
     this.deepgramSocket = new WebSocket(url, ['token', DEEPGRAM_KEY]);
 
