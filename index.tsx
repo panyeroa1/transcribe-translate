@@ -244,6 +244,12 @@ export class GdmLiveAudio extends LitElement {
   private speakerGenderMap: Map<number, 'male' | 'female'> = new Map();
   private lastSpeakerGender: 'male' | 'female' = 'male';
 
+  // Robustness State
+  private deepgramHeartbeat?: any;
+  private reconnectAttempts = 0;
+  private readonly MAX_RECONNECT_ATTEMPTS = 3;
+  private currentInterimBySpeaker: Map<number, TranscriptionSegment> = new Map();
+
   static styles = css`
     :host {
       --bg-color: #f8f9fa;
@@ -803,14 +809,27 @@ export class GdmLiveAudio extends LitElement {
       this.updateError('Missing Deepgram API key');
       return;
     }
-    // Dedicated STT endpoint to keep input processing independent of TTS playback.
     const url = `${DEEPGRAM_ENDPOINT}&channels=1&language=${this.langA}&interim_results=true&smart_format=true&filler_words=true&no_delay=true&vad_events=true`;
+
+    if (this.deepgramSocket) {
+      this.deepgramSocket.close();
+    }
 
     this.deepgramSocket = new WebSocket(url, ['token', DEEPGRAM_KEY]);
 
-    this.deepgramSocket.onopen = () => this.updateStatus('Enhanced Audio Ready');
-    this.deepgramSocket.onmessage = (msg) => {
-      const data = JSON.parse(msg.data);
+    this.deepgramSocket.onopen = () => {
+      this.reconnectAttempts = 0;
+      this.updateStatus('Connected to STT');
+      // 5s Heartbeat to keep socket alive across proxies
+      this.deepgramHeartbeat = setInterval(() => {
+        if (this.deepgramSocket?.readyState === WebSocket.OPEN) {
+          this.deepgramSocket.send(JSON.stringify({ type: 'KeepAlive' }));
+        }
+      }, 5000);
+    };
+
+    this.deepgramSocket.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
 
       // Handle VAD events
       if (data.type === 'SpeechStarted') {
@@ -854,6 +873,7 @@ export class GdmLiveAudio extends LitElement {
               gender: gender
             }];
             this.currentTurnSegments = this.currentTurnSegments.filter(s => s.type !== 'user');
+            this.currentInterimBySpeaker.delete(speakerId);
 
             // Save to Supabase
             supabase.from('transcriptions').insert({
@@ -893,19 +913,41 @@ export class GdmLiveAudio extends LitElement {
         }
       }
     };
-    this.deepgramSocket.onerror = () => this.updateError('Audio pipeline error');
+
+    this.deepgramSocket.onerror = (e) => {
+      console.error('Deepgram WebSocket error:', e);
+      this.handleDeepgramDisconnect();
+    };
+
+    this.deepgramSocket.onclose = () => {
+      clearInterval(this.deepgramHeartbeat);
+      if (this.isRecording && this.reconnectAttempts < this.MAX_RECONNECT_ATTEMPTS) {
+        this.handleDeepgramDisconnect();
+      }
+    };
+  }
+
+  private handleDeepgramDisconnect() {
+    this.reconnectAttempts++;
+    this.updateStatus(`STT Disconnected. Retrying (${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS})...`);
+    setTimeout(() => {
+      if (this.isRecording) this.initDeepgram();
+    }, 2000);
   }
 
   private updateRealtimeUserTranscription(text: string, isInterim: boolean, sentiment?: 'positive' | 'negative' | 'neutral', language?: string, speaker?: number, gender?: 'male' | 'female') {
-    const lastIdx = this.currentTurnSegments.length - 1;
-    const lastSegment = this.currentTurnSegments[lastIdx];
-    if (lastSegment && lastSegment.type === 'user') {
-      const newSegments = [...this.currentTurnSegments];
-      newSegments[lastIdx] = { text, type: 'user', isInterim, sentiment, language: language || lastSegment.language, speaker, gender };
-      this.currentTurnSegments = newSegments;
+    const speakerId = speaker ?? 0;
+    const segment: TranscriptionSegment = { text, type: 'user', isInterim, sentiment, language, speaker: speakerId, gender };
+
+    if (isInterim) {
+      this.currentInterimBySpeaker.set(speakerId, segment);
     } else {
-      this.currentTurnSegments = [...this.currentTurnSegments, { text, type: 'user', isInterim, sentiment, language, speaker, gender }];
+      this.currentInterimBySpeaker.delete(speakerId);
     }
+
+    // Merge interim segments with agent responses in currentTurnSegments
+    const agentSegments = this.currentTurnSegments.filter(s => s.type === 'agent');
+    this.currentTurnSegments = [...agentSegments, ...Array.from(this.currentInterimBySpeaker.values())];
   }
 
   private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral', language?: string, speaker?: number, gender?: 'male' | 'female') {
