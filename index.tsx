@@ -213,7 +213,7 @@ export class GdmLiveAudio extends LitElement {
   private nextStartTime = 0;
   private mediaStream: MediaStream | null = null;
   private sourceNode: MediaStreamAudioSourceNode | null = null;
-  private scriptProcessorNode: ScriptProcessorNode | null = null;
+  private audioWorkletNode: AudioWorkletNode | null = null;
   private inputDestination: MediaStreamAudioDestinationNode | null = null;
   private sources = new Set<AudioBufferSourceNode>();
 
@@ -763,23 +763,25 @@ export class GdmLiveAudio extends LitElement {
         if (transcript) {
           this.updateRealtimeUserTranscription(transcript, !isFinal);
           if (isFinal) {
-            // Save to Supabase (optional, handles missing table gracefully)
+            // Finalize the current interim segment for the user
+            this.transcriptionHistory = [...this.transcriptionHistory, { text: transcript, type: 'user', isInterim: false }];
+            this.currentTurnSegments = this.currentTurnSegments.filter(s => s.type !== 'user');
+
+            // Save to Supabase
             supabase.from('transcriptions').insert({
               room_id: 'default',
               text: transcript,
               source_lang: this.langA,
               type: 'user'
-            }).then(() => { }); // Removed .catch() to avoid lint error on PromiseLike
+            }).then(() => { });
 
             // Route based on selected provider
             if (this.selectedProvider === 'ollama-cartesia') {
-              // Ollama translation + Cartesia TTS pipeline
               this.translateWithOllama(transcript).then((translated) => {
                 this.appendToTranscription(translated, 'agent');
                 this.speakWithCartesia(translated);
               });
             } else {
-              // Default: Gemini Live pipeline - send as text so Gemini translates and speaks it
               this.sessionPromise?.then((session) => {
                 session.sendRealtimeInput([{ text: transcript }]);
               });
@@ -837,20 +839,23 @@ export class GdmLiveAudio extends LitElement {
       this.sourceNode = this.inputAudioContext.createMediaStreamSource(this.mediaStream);
       this.sourceNode.connect(this.inputNode);
 
-      this.scriptProcessorNode = this.inputAudioContext.createScriptProcessor(4096, 1, 1);
-      this.scriptProcessorNode.onaudioprocess = (e) => {
-        if (!this.isRecording) return;
-        const pcmData = e.inputBuffer.getChannelData(0);
-        const int16 = new Int16Array(pcmData.length);
-        for (let i = 0; i < pcmData.length; i++) int16[i] = pcmData[i] * 32768;
-        if (this.deepgramSocket?.readyState === WebSocket.OPEN) this.deepgramSocket.send(int16.buffer);
-      };
-
-      this.inputNode.connect(this.scriptProcessorNode);
-      if (!this.inputDestination) {
-        this.inputDestination = this.inputAudioContext.createMediaStreamDestination();
+      // Robust AudioWorklet migration
+      try {
+        await this.inputAudioContext.audioWorklet.addModule('audio-processor.js');
+        this.audioWorkletNode = new AudioWorkletNode(this.inputAudioContext, 'audio-processor');
+        this.audioWorkletNode.port.onmessage = (e) => {
+          if (this.isRecording && this.deepgramSocket?.readyState === WebSocket.OPEN) {
+            this.deepgramSocket.send(e.data);
+          }
+        };
+        this.inputNode.connect(this.audioWorkletNode);
+        if (!this.inputDestination) this.inputDestination = this.inputAudioContext.createMediaStreamDestination();
+        this.audioWorkletNode.connect(this.inputDestination);
+      } catch (workletErr) {
+        console.error('AudioWorklet failed, falling back to basic connection:', workletErr);
+        // Fallback or handle appropriately
       }
-      this.scriptProcessorNode.connect(this.inputDestination);
+
       this.isRecording = true;
       this.updateStatus('Listening...');
     } catch (err) {
@@ -861,11 +866,11 @@ export class GdmLiveAudio extends LitElement {
   private stopRecording() {
     if (!this.isRecording) return;
     this.isRecording = false;
+    this.audioWorkletNode?.disconnect();
+    this.sourceNode?.disconnect();
+    this.mediaStream?.getTracks().forEach(track => track.stop());
     this.deepgramSocket?.close();
     this.deepgramSocket = null;
-    this.scriptProcessorNode?.disconnect();
-    this.sourceNode?.disconnect();
-    this.mediaStream?.getTracks().forEach(t => t.stop());
     this.isUserSpeaking = false;
     this.updateStatus('Ready');
   }
