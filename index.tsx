@@ -15,7 +15,7 @@ import './visual-2d';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
-const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || 'ce5372276dac663d3c65bdd9e354f867d90d0cad';
+const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || '';
 const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&language=multi&model=nova-3&encoding=linear16&sample_rate=16000';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -117,6 +117,49 @@ const VOICE_MAP = [
   { name: 'Puck (Energetic)', value: 'Puck' },
 ];
 
+// Provider options
+const PROVIDER_MAP = [
+  { id: 'gemini', name: 'Gemini Live (Default)' },
+  { id: 'ollama-cartesia', name: 'Ollama + Cartesia TTS' },
+];
+
+// STT Provider options
+const STT_PROVIDER_MAP = [
+  { id: 'deepgram', name: 'Deepgram Nova-3 (Default)' },
+  { id: 'faster-whisper', name: 'Faster-Whisper (CPU)' },
+];
+
+// Ollama TTS-ready translator system prompt
+const OLLAMA_TTS_PROMPT = `SYSTEM — ORBIT TTS-READY TRANSLATOR (CARTESIA SONIC-3 TAGS)
+
+ROLE
+You are a strict, real-time translation engine designed for Text-to-Speech playback.
+Your sole job is to output ONE SINGLE STRING that is the translation of the user-provided text into the requested target language, formatted for Cartesia Sonic-3 with approved SSML-like tags.
+
+INPUT (ONE OBJECT PER TURN; JSON STRING)
+The user message will be a JSON object encoded as a string. It can include:
+- text: string (required) — the source utterance
+- source_lang: string (optional) — BCP-47 (e.g., "en-US", "tl-PH", "nl-BE")
+- target_lang: string (required) — BCP-47 (e.g., "en-US", "tl-PH", "nl-BE")
+
+OUTPUT (HARD RULES)
+Return EXACTLY ONE STRING and NOTHING ELSE.
+The output string MAY CONTAIN ONLY:
+1) The translated text in the target language
+2) The following Cartesia Sonic-3 tags (exact formats):
+   - <emotion value="..."/>
+   - <speed ratio="..."/>
+   - <break time="..."/>
+3) The nonverbal token: [laughter]
+
+ABSOLUTELY FORBIDDEN IN OUTPUT
+- No labels, no JSON, no markdown, no quotes wrapping the whole output, no explanations.
+
+TRANSLATION POLICY (STRICT)
+- Preserve meaning exactly. Do not add, omit, or summarize.
+- Preserve tone, slang, and profanity.
+- Preserve proper nouns and numbers exactly.`;
+
 // Languages imported from languages.ts (110+ languages from jw.org)
 
 interface TranscriptionSegment {
@@ -137,6 +180,8 @@ export class GdmLiveAudio extends LitElement {
   @state() selectedPersonaId = 'miles';
   @state() systemPrompt = MILES_PERSONA;
   @state() selectedVoice = 'Orus';
+  @state() selectedProvider = 'gemini';
+  @state() selectedSttProvider = 'deepgram';
   @state() langA = 'en-US';
   @state() langB = 'tl-PH';
   @state() transcriptionHistory: TranscriptionSegment[] = [];
@@ -148,6 +193,8 @@ export class GdmLiveAudio extends LitElement {
   @query('#personaSelect') private personaSelect!: HTMLSelectElement;
   @query('#langASelect') private langASelect!: HTMLSelectElement;
   @query('#langBSelect') private langBSelect!: HTMLSelectElement;
+  @query('#providerSelect') private providerSelect!: HTMLSelectElement;
+  @query('#sttProviderSelect') private sttProviderSelect!: HTMLSelectElement;
   @query('.transcription-container') private transcriptionContainer!: HTMLElement;
 
   private sessionPromise: Promise<any> | null = null;
@@ -537,6 +584,8 @@ export class GdmLiveAudio extends LitElement {
     this.selectedPersonaId = this.personaSelect?.value || 'miles';
     this.systemPrompt = this.textarea?.value || MILES_PERSONA;
     this.selectedVoice = this.voiceSelect?.value || 'Orus';
+    this.selectedProvider = this.providerSelect?.value || 'gemini';
+    this.selectedSttProvider = this.sttProviderSelect?.value || 'deepgram';
     this.langA = this.langASelect?.value || 'en-US';
     this.langB = this.langBSelect?.value || 'tl-PH';
     this.isSettingsOpen = false;
@@ -547,6 +596,8 @@ export class GdmLiveAudio extends LitElement {
         selected_persona_id: this.selectedPersonaId,
         system_prompt: this.systemPrompt,
         selected_voice: this.selectedVoice,
+        selected_provider: this.selectedProvider,
+        selected_stt_provider: this.selectedSttProvider,
         lang_a: this.langA,
         lang_b: this.langB
       });
@@ -558,6 +609,68 @@ export class GdmLiveAudio extends LitElement {
     this.nextStartTime = this.outputAudioContext.currentTime;
     this.inputNode.gain.setValueAtTime(this.isMicMuted ? 0 : 1, this.inputAudioContext.currentTime);
     this.outputNode.gain.setValueAtTime(this.isSpeakerMuted ? 0 : 1, this.outputAudioContext.currentTime);
+  }
+
+  // Ollama translation API
+  private async translateWithOllama(text: string): Promise<string> {
+    const payload = JSON.stringify({
+      text,
+      source_lang: this.langA,
+      target_lang: this.langB
+    });
+    try {
+      const res = await fetch('http://168.231.78.113:11434/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'gpt-oss:120b-cloud',
+          messages: [
+            { role: 'system', content: OLLAMA_TTS_PROMPT },
+            { role: 'user', content: payload }
+          ],
+          stream: false
+        })
+      });
+      const data = await res.json();
+      return data.message?.content || text;
+    } catch (err) {
+      console.error('Ollama translation error:', err);
+      return text;
+    }
+  }
+
+  // Cartesia TTS API
+  private async speakWithCartesia(text: string): Promise<void> {
+    const cartesiaKey = 'sk_car_JmdGRhBt1ocwhqmrxy2gaa';
+    try {
+      const res = await fetch('https://api.cartesia.ai/tts/bytes', {
+        method: 'POST',
+        headers: {
+          'X-API-Key': cartesiaKey,
+          'Cartesia-Version': '2025-04-16',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model_id: 'sonic-3-latest',
+          transcript: text,
+          voice: { id: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e' },
+          output_format: { container: 'raw', encoding: 'pcm_f32le', sample_rate: 24000 }
+        })
+      });
+      if (!res.ok) throw new Error('Cartesia TTS failed');
+      const arrayBuffer = await res.arrayBuffer();
+      const float32 = new Float32Array(arrayBuffer);
+      const audioBuffer = this.outputAudioContext.createBuffer(1, float32.length, 24000);
+      audioBuffer.copyToChannel(float32, 0);
+      const source = this.outputAudioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(this.outputNode);
+      this.nextStartTime = Math.max(this.nextStartTime, this.outputAudioContext.currentTime);
+      source.start(this.nextStartTime);
+      this.nextStartTime += audioBuffer.duration;
+    } catch (err) {
+      console.error('Cartesia TTS error:', err);
+    }
   }
 
   private async initClient() {
@@ -647,9 +760,21 @@ export class GdmLiveAudio extends LitElement {
         if (transcript) {
           this.updateRealtimeUserTranscription(transcript, !isFinal);
           if (isFinal) {
-            this.sessionPromise?.then((session) => {
-              session.sendRealtimeInput({ text: transcript });
-            });
+            // Route based on selected provider
+            if (this.selectedProvider === 'ollama-cartesia') {
+              // Ollama translation + Cartesia TTS pipeline
+              this.translateWithOllama(transcript).then((translated) => {
+                this.appendToTranscription(translated, 'agent');
+                this.speakWithCartesia(translated);
+                this.transcriptionHistory = [...this.transcriptionHistory, ...this.currentTurnSegments];
+                this.currentTurnSegments = [];
+              });
+            } else {
+              // Default: Gemini Live pipeline
+              this.sessionPromise?.then((session) => {
+                session.sendRealtimeInput({ text: transcript });
+              });
+            }
           }
         }
       }
@@ -809,6 +934,14 @@ export class GdmLiveAudio extends LitElement {
             <div class="field">
               <label>Gemini Voice</label>
               <select id="voiceSelect">${VOICE_MAP.map(v => html`<option value="${v.value}" ?selected=${this.selectedVoice === v.value}>${v.name}</option>`)}</select>
+            </div>
+            <div class="field">
+              <label>Translation Provider</label>
+              <select id="providerSelect">${PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedProvider === p.id}>${p.name}</option>`)}</select>
+            </div>
+            <div class="field">
+              <label>STT Provider</label>
+              <select id="sttProviderSelect">${STT_PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedSttProvider === p.id}>${p.name}</option>`)}</select>
             </div>
             <div class="modal-actions">
               <button class="btn-cancel" @click=${this.toggleSettings}>Cancel</button>
