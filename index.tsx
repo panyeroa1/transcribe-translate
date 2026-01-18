@@ -473,11 +473,19 @@ export class GdmLiveAudio extends LitElement {
     .transcription-word {
       display: inline-block;
       margin-right: 0.25em;
+      opacity: 0;
+      animation: wordFadeIn 0.3s forwards;
+      animation-delay: calc(var(--word-index) * 0.05s);
+    }
+
+    @keyframes wordFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .sentiment-positive .transcription-word { color: var(--pos-color); }
     .sentiment-negative .transcription-word { color: var(--neg-color); }
-    .sentiment-neutral .transcription-word { color: var(--neu-color); }
+    .sentiment-neutral .transcription-word { color: #333; }
 
     .status-toast {
       position: fixed;
@@ -959,7 +967,7 @@ export class GdmLiveAudio extends LitElement {
     this.currentTurnSegments = [...agentSegments, ...Array.from(this.currentInterimBySpeaker.values())];
   }
 
-  private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral', language?: string, speaker?: number, gender?: 'male' | 'female') {
+  private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral', language?: string, speaker?: number, gender?: 'male' | 'female', saveToSupabase = true) {
     const lastIdx = this.currentTurnSegments.length - 1;
     const lastSegment = this.currentTurnSegments[lastIdx];
     if (lastSegment && lastSegment.type === type) {
@@ -976,6 +984,16 @@ export class GdmLiveAudio extends LitElement {
       this.currentTurnSegments = newSegments;
     } else {
       this.currentTurnSegments = [...this.currentTurnSegments, { text, type, isInterim: false, sentiment, language, speaker, gender }];
+    }
+
+    if (saveToSupabase && type === 'agent' && text.length > 5) {
+      supabase.from('transcriptions').insert({
+        room_id: 'default',
+        text: text,
+        source_lang: language || this.langB,
+        type: 'agent',
+        metadata: { speaker, gender }
+      }).then(() => { });
     }
   }
 
@@ -1096,7 +1114,7 @@ export class GdmLiveAudio extends LitElement {
           ${allSegments.map((segment) => html`
             <div class="segment sentiment-${segment.sentiment || 'neutral'} ${segment.isInterim ? 'interim' : ''}">
               <div class="segment-text">
-                ${segment.text}
+                ${segment.text.split(' ').map((word, i) => html`<span class="transcription-word" style="--word-index: ${i}">${word}</span>`)}
               </div>
               <div class="segment-footer">
                 <div class="lang-info">
@@ -1141,12 +1159,13 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private getLanguageLabel(segment: TranscriptionSegment) {
+    const genderLabel = segment.gender ? (segment.gender === 'female' ? 'Female' : 'Male') : '';
     if (segment.type === 'agent') {
       const source = this.langA;
       const target = segment.language || this.langB;
-      return `${this.getLangName(source)} to ${this.getLangName(target)}`;
+      return html`${genderLabel ? html`<span style="color: var(--accent-color)">${genderLabel}</span> • ` : ''} ${this.getLangName(source)} to ${this.getLangName(target)}`;
     }
-    return `Detected: ${this.getLangName(segment.language || this.langA)}`;
+    return html`${genderLabel ? html`<span style="color: var(--accent-color)">${genderLabel}</span> • ` : ''} Detected: ${this.getLangName(segment.language || this.langA)}`;
   }
 
   private getLangName(code: string) {
