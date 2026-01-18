@@ -6,8 +6,9 @@
  */
 
 import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
-import { LitElement, css, html, PropertyValues } from 'lit';
+import { LitElement, html, css, PropertyValues } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
+import { ref, createRef } from 'lit/directives/ref.js';
 import { createClient } from '@supabase/supabase-js';
 import { createBlob, decode, decodeAudioData } from './utils';
 import { LANGUAGE_OPTIONS } from './languages';
@@ -194,8 +195,10 @@ export class GdmLiveAudio extends LitElement {
   @state() isSpeakerMuted = false; // Speaker unmuted to allow Gemini to read translations aloud
   @state() status = '';
   @state() error = '';
-  @state() isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
   @state() isSettingsOpen = false;
+  @state() isHistoryOpen = false;
+  @state() isParticipantsOpen = false;
+  @state() activeSheet: 'settings' | 'history' | 'participants' | null = null;
   @state() selectedPersonaId = 'miles';
   @state() systemPrompt = MILES_PERSONA;
   @state() selectedVoice = 'Orus';
@@ -208,15 +211,19 @@ export class GdmLiveAudio extends LitElement {
   @state() isUserSpeaking = false;
   @state() private micLevel = 0;
   @state() private speakerLevel = 0;
+  @state() participantsMutedByDefault = true;
+  @state() wordSpeedMs = 70;
 
   @query('#promptTextarea') private textarea!: HTMLTextAreaElement;
   @query('#voiceSelect') private voiceSelect!: HTMLSelectElement;
   @query('#personaSelect') private personaSelect!: HTMLSelectElement;
-  @query('#langASelect') private langASelect!: HTMLSelectElement;
-  @query('#langBSelect') private langBSelect!: HTMLSelectElement;
+  @query('#langASelect') langASelect?: HTMLSelectElement;
+  @query('#langBSelect') langBSelect?: HTMLSelectElement;
   @query('#providerSelect') private providerSelect!: HTMLSelectElement;
-  @query('#sttProviderSelect') private sttProviderSelect!: HTMLSelectElement;
-  @query('.transcription-container') private transcriptionContainer!: HTMLElement;
+  @query('#sttProviderSelect') sttProviderSelect?: HTMLSelectElement;
+
+  private txViewport = createRef<HTMLDivElement>();
+  private trViewport = createRef<HTMLDivElement>();
 
   private sessionPromise: Promise<any> | null = null;
   private session: any = null;
@@ -252,315 +259,332 @@ export class GdmLiveAudio extends LitElement {
 
   static styles = css`
     :host {
-      --bg-color: #f8f9fa;
-      --text-color: #2c3e50;
-      --card-bg: #ffffff;
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-      --accent-color: #ff5722; /* Eburon Vibrant Accent */
-      --secondary-color: #6c757d;
-      --nav-bg: #ffffff;
-      --fab-bg: #2d2d2d;
-      --user-blue: #3498db;
-      --agent-purple: #9b59b6;
-      --pos-color: #27ae60;
-      --neg-color: #e74c3c;
-      --neu-color: #3498db;
+      --bg: #050505;
+      --panel: rgba(0,0,0,.25);
+      --card: rgba(20,20,22,.75);
+      --border: rgba(255,255,255,.08);
+      --muted: rgba(255,255,255,.55);
+      --muted2: rgba(255,255,255,.35);
+      --text: #ffffff;
+      --lime: #9BFF3A;
+      --radius: 18px;
+      --radius2: 24px;
       
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
       display: flex;
       flex-direction: column;
-      width: 100vw;
       height: 100vh;
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Outfit', 'Inter', sans-serif;
+      background: 
+        radial-gradient(900px 600px at 50% -10%, rgba(155,255,58,.12), transparent 55%),
+        radial-gradient(900px 600px at 20% 110%, rgba(255,255,255,.06), transparent 55%),
+        linear-gradient(180deg, #020202, #000 35%, #000);
+      color: var(--text);
       overflow: hidden;
-      position: relative;
     }
 
+    /* ====== Top Bar ====== */
     header {
+      padding: 14px 20px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 24px;
-      background: transparent;
-      z-index: 150;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.15));
+      backdrop-filter: blur(10px);
+      z-index: 200;
     }
 
-    .header-left, .header-right {
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--lime);
+      box-shadow: 0 0 0 6px rgba(155,255,58,.08);
+    }
+    .titleWrap { min-width: 0; }
+    .title { font-size: 14px; font-weight: 700; letter-spacing: .2px; line-height: 1.1; }
+    .subtitle { margin-top: 3px; font-size: 11px; color: var(--muted); opacity: 0.8; }
+
+    .statusPill {
       display: flex;
       align-items: center;
-      width: 48px;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,0.35);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .liveDot { width: 7px; height: 7px; border-radius: 50%; background: #ff4d4d; }
+    .liveDot.on { background: var(--lime); box-shadow: 0 0 10px var(--lime); }
+
+    /* ====== Panels ====== */
+    .panels {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+      padding-bottom: 100px;
     }
 
-    .header-center h1 {
-      font-size: 18px;
-      font-weight: 700;
-      color: #000;
-      margin: 0;
-    }
-
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #eee;
+    .panel {
+      flex: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .panelHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
     }
 
-    .transcription-viewport {
+    .panelHeader .label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .hint { font-size: 12px; color: var(--muted2); }
+
+    .list {
       flex: 1;
       overflow-y: auto;
-      padding: 10px 24px 120px 24px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 12px;
+      scroll-behavior: smooth;
     }
 
-    .transcription-container {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
+    .msg {
+      border: 1px solid rgba(255,255,255,.08);
+      background: var(--card);
+      border-radius: 16px;
+      padding: 12px;
+      backdrop-filter: blur(10px);
+      width: fit-content;
+      max-width: 90%;
     }
 
-    .segment {
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      transition: transform 0.2s ease;
-      position: relative;
-    }
-
-    .segment:active {
-      transform: scale(0.98);
-    }
-
-    .segment-text {
-      font-size: 18px;
-      line-height: 1.6;
-      color: #333;
-      font-weight: 400;
-    }
-
-    .segment-footer {
-      display: flex;
-      justify-content: space-between;
+    .meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .badge {
+      display: inline-flex;
       align-items: center;
-      padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,0.2);
+      color: var(--muted);
     }
+    .badge .chip { width: 6px; height: 6px; border-radius: 50%; background: var(--muted2); }
+    .time { font-size: 10px; color: var(--muted2); }
 
-    .lang-info {
-      font-size: 13px;
-      color: var(--secondary-color);
-      font-weight: 500;
+    .text { font-size: 14px; line-height: 1.45; word-wrap: break-word; }
+
+    /* Transcription = White */
+    .panel.transcription .text { color: rgba(255,255,255,.95); }
+
+    /* Translation = Right-aligned + Lime */
+    .panel.translation .list { align-items: flex-end; }
+    .panel.translation .msg {
+      border: 1px solid rgba(155,255,58,.15);
+      background: rgba(10,12,10,.5);
     }
+    .panel.translation .text { color: var(--lime); text-align: right; }
+    .panel.translation .badge { border-color: rgba(155,255,58,.2); color: var(--lime); background: rgba(155,255,58,.05); }
+    .panel.translation .badge .chip { background: var(--lime); }
 
-    .segment-actions {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .action-icon {
-      width: 20px;
-      height: 20px;
-      fill: #ccd1d9;
-      cursor: pointer;
-      transition: fill 0.2s ease;
-    }
-
-    .action-icon:hover {
-      fill: var(--accent-color);
-    }
-
-    .action-icon.active {
-      fill: var(--accent-color);
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 80px;
-      background: var(--nav-bg);
-      border-top: 1px solid #f0f0f0;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0 20px;
-      z-index: 140;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      color: #ccd1d9;
-      cursor: pointer;
-      transition: color 0.2s ease;
-    }
-
-    .nav-item.active {
-      color: var(--accent-color);
-    }
-
-    .nav-item svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-
-    .fab-container {
-      position: fixed;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 150;
-    }
-
-    .mic-fab {
-      width: 72px;
-      height: 72px;
-      background: var(--fab-bg);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      cursor: pointer;
-      border: none;
-      transition: transform 0.2s ease, background 0.2s ease;
-    }
-
-    .mic-fab:active {
-      transform: scale(0.9);
-    }
-
-    .mic-fab svg {
-      width: 32px;
-      height: 32px;
-      fill: #ffaa33;
-    }
-
-    .mic-fab.active {
-      background: var(--accent-color);
-    }
-
-    .mic-fab.active svg {
-      fill: white;
-    }
-
-    /* Subtitle style overrides for active turn if needed */
-    .interim {
-      opacity: 0.7;
-    }
-
-    .transcription-word {
+    /* Word Animation */
+    .word {
+      opacity: 0.1;
+      filter: blur(1px);
+      transition: opacity 0.2s ease, filter 0.2s ease;
       display: inline-block;
       margin-right: 0.25em;
+    }
+    .word.on { opacity: 1; filter: blur(0); }
+
+    /* ====== Bottom Bar ====== */
+    .bottomBar {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 74px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 10px 12px;
+      z-index: 500;
+    }
+
+    .navGroup { display: flex; align-items: center; gap: 10px; }
+
+    .iconBtn {
+      width: 44px; height: 44px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.2s;
+    }
+    .iconBtn:hover { background: rgba(255,255,255,.08); }
+    .iconBtn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .iconBtn.active { border-color: var(--lime); color: var(--lime); background: rgba(155,255,58,.05); }
+
+    .micBtn {
+      width: 66px; height: 66px;
+      border-radius: 22px;
+      border: 1px solid rgba(155,255,58,.22);
+      background: rgba(155,255,58,.1);
+      margin-top: -30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .micBtn.on {
+      background: rgba(155,255,58,.2);
+      border-color: rgba(155,255,58,.4);
+      box-shadow: 0 0 20px rgba(155,255,58,.2);
+      animation: micGlow 2s infinite;
+    }
+    @keyframes micGlow {
+      0% { box-shadow: 0 0 15px rgba(155,255,58,0.2); }
+      50% { box-shadow: 0 0 35px rgba(155,255,58,0.4); }
+      100% { box-shadow: 0 0 15px rgba(155,255,58,0.2); }
+    }
+
+    /* ====== Sheets ====== */
+    .sheetOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
       opacity: 0;
-      animation: wordFadeIn 0.3s forwards;
-      animation-delay: calc(var(--word-index) * 0.05s);
+      pointer-events: none;
+      transition: opacity 0.2s;
     }
+    .sheetOverlay.show { opacity: 1; pointer-events: auto; }
 
-    @keyframes wordFadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+    .sheet {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(10,10,12,0.95);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height: 75vh;
+      display: flex;
+      flex-direction: column;
     }
+    .sheetOverlay.show .sheet { transform: translateY(0); }
 
-    .sentiment-positive .transcription-word { color: var(--pos-color); }
-    .sentiment-negative .transcription-word { color: var(--neg-color); }
-    .sentiment-neutral .transcription-word { color: #333; }
+    .sheetHeader {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sheetTitle { font-weight: 800; font-size: 16px; letter-spacing: .5px; }
+    .closeBtn {
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .closeBtn svg { width: 18px; height: 18px; stroke: #fff; stroke-width: 2.5; }
+
+    .sheetBody { padding: 20px; overflow-y: auto; flex: 1; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .row:last-child { border-bottom: none; }
+    .row .left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .row .name { font-size: 14px; font-weight: 700; }
+    .row .desc { font-size: 12px; color: var(--muted); }
+
+    .toggle {
+      width: 50px; height: 28px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.1);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle.on { background: var(--lime); }
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      transition: left 0.2s;
+    }
+    .toggle.on::after { left: 25px; }
 
     .status-toast {
       position: fixed;
-      top: 100px;
+      top: 80px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.7);
-      color: white;
+      background: var(--lime);
+      color: #000;
       padding: 8px 16px;
-      border-radius: 20px;
+      border-radius: 12px;
       font-size: 12px;
-      z-index: 300;
-      pointer-events: none;
+      font-weight: 700;
+      z-index: 600;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s;
     }
+    .status-toast.visible { opacity: 1; }
 
-    .status-toast.visible {
-      opacity: 1;
+    /* Custom Input/Textarea for Sheet Body */
+    select, textarea {
+      width: 100%;
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 12px;
+      color: #fff;
+      font-family: inherit;
+      margin-top: 8px;
     }
-
-    .settings-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 400;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(8px);
-    }
-
-    .settings-content {
-      background: #fff;
-      width: 90%;
-      max-width: 500px;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 32px;
-      border-radius: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .field { display: flex; flex-direction: column; gap: 8px; }
-    label { font-size: 13px; font-weight: 600; opacity: 0.7; }
-    
-    textarea, select {
-      padding: 14px;
-      border-radius: 16px;
-      border: 1px solid #f0f0f0;
-      background: #f8f9fa;
-      color: #333;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-    }
-
-    .btn-save {
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-cancel {
+    label { font-size: 11px; font-weight: 700; color: var(--lime); text-transform: uppercase; }
   `;
 
   constructor() {
@@ -585,6 +609,8 @@ export class GdmLiveAudio extends LitElement {
         this.selectedSttProvider = data.selected_stt_provider || 'deepgram';
         this.langA = data.lang_a || 'en-US';
         this.langB = data.lang_b || 'tl-PH';
+        this.participantsMutedByDefault = data.participants_muted_by_default ?? true;
+        this.wordSpeedMs = data.word_speed_ms ?? 70;
         this.reset();
       }
       // 404 = table doesn't exist, just use defaults silently
@@ -595,16 +621,12 @@ export class GdmLiveAudio extends LitElement {
 
   updated(changedProperties: PropertyValues<this>) {
     super.updated(changedProperties);
-    if (changedProperties.has('isDarkMode')) {
-      if (this.isDarkMode) this.setAttribute('dark', '');
-      else this.removeAttribute('dark');
-    }
-    if ((changedProperties.has('currentTurnSegments') || changedProperties.has('transcriptionHistory')) && this.transcriptionContainer) {
-      this.transcriptionContainer.scrollTop = this.transcriptionContainer.scrollHeight;
+    if ((changedProperties.has('currentTurnSegments') || changedProperties.has('transcriptionHistory'))) {
+      if (this.txViewport.value) this.txViewport.value.scrollTop = this.txViewport.value.scrollHeight;
+      if (this.trViewport.value) this.trViewport.value.scrollTop = this.trViewport.value.scrollHeight;
     }
   }
 
-  private toggleDarkMode() { this.isDarkMode = !this.isDarkMode; }
   private toggleMic() {
     this.isMicMuted = !this.isMicMuted;
     this.inputNode.gain.setValueAtTime(this.isMicMuted ? 0 : 1, this.inputAudioContext.currentTime);
@@ -613,7 +635,13 @@ export class GdmLiveAudio extends LitElement {
     this.isSpeakerMuted = !this.isSpeakerMuted;
     this.outputNode.gain.setValueAtTime(this.isSpeakerMuted ? 0 : 1, this.outputAudioContext.currentTime);
   }
-  private toggleSettings() { this.isSettingsOpen = !this.isSettingsOpen; }
+
+  private openSheet(sheet: 'settings' | 'history' | 'participants') {
+    this.activeSheet = sheet;
+  }
+  private closeSheet() {
+    this.activeSheet = null;
+  }
 
   private onPersonaChange(e: Event) {
     const personaId = (e.target as HTMLSelectElement).value;
@@ -648,7 +676,9 @@ export class GdmLiveAudio extends LitElement {
         selected_provider: this.selectedProvider,
         selected_stt_provider: this.selectedSttProvider,
         lang_a: this.langA,
-        lang_b: this.langB
+        lang_b: this.langB,
+        participants_muted_by_default: this.participantsMutedByDefault,
+        word_speed_ms: this.wordSpeedMs,
       });
     } catch (err) { }
     this.reset();
@@ -974,7 +1004,7 @@ export class GdmLiveAudio extends LitElement {
       const newSegments = [...this.currentTurnSegments];
       newSegments[lastIdx] = {
         ...lastSegment,
-        text: lastSegment.text + text,
+        text: lastSegment.text + ' ' + text, // Add space for appended text
         isInterim: false,
         sentiment: sentiment || lastSegment.sentiment,
         language: language || lastSegment.language,
@@ -1087,8 +1117,29 @@ export class GdmLiveAudio extends LitElement {
     this.updateStatus('Session reset');
   }
 
+  private renderMsg(segment: TranscriptionSegment) {
+    const isUser = segment.type === 'user';
+    const tokens = segment.text.split(/\s+/).filter(Boolean);
+    return html`
+      <div class="msg">
+        <div class="meta">
+          <div class="badge">
+            <span class="chip"></span>
+            <span>${segment.gender === 'female' ? 'Female' : 'Male'}</span>
+          </div>
+          <div class="time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+        <div class="text">
+          ${tokens.map((token, i) => html`<span class="word on" style="transition-delay: ${i * this.wordSpeedMs}ms">${token} </span>`)}
+        </div>
+      </div>
+    `;
+  }
+
   render() {
     const allSegments = [...this.transcriptionHistory, ...this.currentTurnSegments];
+    const userSegments = allSegments.filter(s => s.type === 'user');
+    const agentSegments = allSegments.filter(s => s.type === 'agent');
 
     return html`
       <div class="status-toast ${this.status || this.error ? 'visible' : ''}">
@@ -1096,153 +1147,175 @@ export class GdmLiveAudio extends LitElement {
       </div>
 
       <header>
-        <div class="header-left">
-          <svg class="action-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        </div>
-        <div class="header-center">
-          <h1>Translation history</h1>
-        </div>
-        <div class="header-right">
-          <div class="avatar">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Miles" alt="Avatar">
+        <div class="brand">
+          <div class="dot"></div>
+          <div class="titleWrap">
+            <div class="title">Orbit Translator</div>
+            <div class="subtitle">Classroom Mode — auto-archived</div>
           </div>
+        </div>
+        <div class="statusPill">
+          <span class="liveDot ${this.isRecording ? 'on' : ''}"></span>
+          <span>${this.isRecording ? 'Listening' : 'Idle'}</span>
         </div>
       </header>
 
-      <div class="transcription-viewport">
-        <div class="transcription-container">
-          ${allSegments.map((segment) => html`
-            <div class="segment sentiment-${segment.sentiment || 'neutral'} ${segment.isInterim ? 'interim' : ''}">
-              <div class="segment-text">
-                ${segment.text.split(' ').map((word, i) => html`<span class="transcription-word" style="--word-index: ${i}">${word}</span>`)}
-              </div>
-              <div class="segment-footer">
-                <div class="lang-info">
-                  ${this.getLanguageLabel(segment)}
-                </div>
-                <div class="segment-actions">
-                  <svg class="action-icon" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg>
-                  <svg class="action-icon" viewBox="0 0 24 24" @click=${() => this.speakText(segment.text, segment.gender)}><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                </div>
-              </div>
+      <div class="panels">
+        <!-- Transcription (Top) -->
+        <section class="panel transcription">
+          <div class="panelHeader">
+            <div class="label">
+              <svg viewBox="0 0 24 24"><path d="M6 9h12M6 13h9M6 17h7" stroke="#fff" stroke-linecap="round"/></svg>
+              <span>Transcription</span>
             </div>
-          `)}
-        </div>
+            <div class="hint">${userSegments.length} lines</div>
+          </div>
+          <div class="list" ${ref(this.txViewport)}>
+            ${userSegments.map(s => this.renderMsg(s))}
+          </div>
+        </section>
+
+        <!-- Translation (Bottom) -->
+        <section class="panel translation">
+          <div class="panelHeader">
+            <div class="label">
+              <svg viewBox="0 0 24 24"><path d="M4 5h10M4 10h7M12 19l6-14 2 0-6 14h-2z" stroke="var(--lime)" stroke-linecap="round"/></svg>
+              <span>Translation</span>
+            </div>
+            <div class="hint">${agentSegments.length} lines</div>
+          </div>
+          <div class="list" ${ref(this.trViewport)}>
+            ${agentSegments.map(s => this.renderMsg(s))}
+          </div>
+        </section>
       </div>
 
-      <div class="bottom-nav">
-        <div class="nav-item">
-          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <!-- Bottom Bar -->
+      <div class="bottomBar">
+        <div class="navGroup">
+          <button class="iconBtn ${this.isSpeakerMuted ? '' : 'active'}" @click=${this.toggleSpeaker}>
+            <svg viewBox="0 0 24 24"><path d="M11 5 7 9H4v6h3l4 4V5z"/><path d="M15 9c1.2 1.2 1.2 4.8 0 6"/><path d="M17.5 7c2.5 2.5 2.5 7.5 0 10"/></svg>
+          </button>
+          <button class="iconBtn" @click=${() => this.openSheet('history')}>
+            <svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M4.5 12a7.5 7.5 0 1 0 2-5.2"/><path d="M4 4v4h4" stroke-linejoin="round"/></svg>
+          </button>
         </div>
-        <div class="nav-item active">
-          <svg viewBox="0 0 24 24"><path d="M12.85 4.51C12.44 2.8 11.56 2.8 11.15 4.51L9.62 10.87H14.38L12.85 4.51ZM18.5 22L17.5 19H12V14H17.5L18.5 11H21.5L20.5 14H24L23 11H20.5L19.5 14H14V19H19.5L20.5 22H18.5ZM13.5 14H10.5L9.5 11H6.5L7.5 14H3.5L2.5 11H0L1 14H3.5L4.5 17H0.5L1.5 20H4L5 17H9.5L10.5 20H13L12 17H9.5L8.5 14H11.5L12.5 17H13.5z"/></svg>
-        </div>
-        <div class="nav-item">
-          <div style="width: 72px;"></div>
-        </div>
-        <div class="nav-item">
-          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-        </div>
-        <div class="nav-item" @click=${this.toggleSettings}>
-          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
-        </div>
-      </div>
 
-      <div class="fab-container">
-        <button class="mic-fab ${this.isRecording ? 'active' : ''}" @click=${this.isRecording ? this.stopRecording : this.startRecording}>
-          <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <button class="iconBtn micBtn ${this.isRecording ? 'on' : ''}" @click=${this.isRecording ? this.stopRecording : this.startRecording}>
+          <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3z"/><path d="M5 11a7 7 0 0 0 14 0" stroke-linecap="round"/><path d="M12 18v3" stroke-linecap="round"/></svg>
         </button>
+
+        <div class="navGroup">
+          <button class="iconBtn" @click=${() => this.openSheet('participants')}>
+            <svg viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/><path d="M8 12a2.6 2.6 0 1 0-2.6-2.6A2.6 2.6 0 0 0 8 12z"/><path d="M12.5 20c.4-3 2.2-5 5.5-5 3.2 0 4.6 2 5 5"/><path d="M1 20c.25-2.5 1.7-4 4.2-4 1.9 0 3.1.7 3.7 2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="iconBtn" @click=${() => this.openSheet('settings')}>
+            <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a7.9 7.9 0 0 0 .1-2l2-1.3-2-3.4-2.3.7a7.7 7.7 0 0 0-1.7-1L15.2 5H8.8L8.5 7.9a7.7 7.7 0 0 0-1.7 1l-2.3-.7-2 3.4L4.5 13a7.9 7.9 0 0 0 .1 2l-2 1.3 2 3.4 2.3-.7a7.7 7.7 0 0 0 1.7 1l.3 2.9h6.4l.3-2.9a7.7 7.7 0 0 0 1.7-1l2.3.7 2-3.4-2-1.3z" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
       </div>
 
-      ${this.renderSettings()}
+      <!-- Bottom Sheets -->
+      <div class="sheetOverlay ${this.activeSheet ? 'show' : ''}" @click=${this.closeSheet}>
+        <div class="sheet" @click=${(e: Event) => e.stopPropagation()}>
+          <div class="sheetHeader">
+            <div class="sheetTitle">${this.activeSheet === 'settings' ? 'Settings' : this.activeSheet === 'history' ? 'History' : 'Participants'}</div>
+            <div class="closeBtn" @click=${this.closeSheet}>
+              <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <div class="sheetBody">
+            ${this.activeSheet === 'settings' ? this.renderSettingsSheet() : this.activeSheet === 'history' ? this.renderHistorySheet() : this.renderParticipantsSheet()}
+          </div>
+        </div>
+      </div>
     `;
   }
 
-  private getLanguageLabel(segment: TranscriptionSegment) {
-    const genderLabel = segment.gender ? (segment.gender === 'female' ? 'Female' : 'Male') : '';
-    if (segment.type === 'agent') {
-      const source = this.langA;
-      const target = segment.language || this.langB;
-      return html`${genderLabel ? html`<span style="color: var(--accent-color)">${genderLabel}</span> • ` : ''} ${this.getLangName(source)} to ${this.getLangName(target)}`;
-    }
-    return html`${genderLabel ? html`<span style="color: var(--accent-color)">${genderLabel}</span> • ` : ''} Detected: ${this.getLangName(segment.language || this.langA)}`;
-  }
-
-  private getLangName(code: string) {
-    return LANGUAGE_OPTIONS.find(l => l.code === code)?.name.split(' (')[0] || code;
-  }
-
-  private speakText(text: string, gender?: 'male' | 'female') {
-    if (this.selectedProvider === 'ollama-cartesia') {
-      this.speakWithCartesia(text, gender);
-    } else {
-      // For Gemini, we might need a separate TTS helper if not in active session
-      // For now, we reuse speakWithCartesia as a fallback or if configured
-      this.speakWithCartesia(text, gender);
-    }
-  }
-
-  private renderSettings() {
-    if (!this.isSettingsOpen) return html``;
+  private renderSettingsSheet() {
     return html`
-      <div class="settings-modal" @click=${this.toggleSettings}>
-        <div class="settings-content" @click=${(e: Event) => e.stopPropagation()}>
-          <header style="padding: 0; height: auto; background: transparent; border: none; justify-content: flex-start; margin-bottom: 20px;">
-            <h2 style="margin: 0;">Settings</h2>
-          </header>
-          
-          <div class="field">
-            <label>Miles Persona</label>
-            <select id="personaSelect" @change=${this.onPersonaChange}>
-              ${PERSONA_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedPersonaId === p.id}>${p.name}</option>`)}
-            </select>
-          </div>
+      <div class="field">
+        <label>Persona</label>
+        <select id="personaSelect" @change=${this.onPersonaChange}>
+          ${PERSONA_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedPersonaId === p.id}>${p.name}</option>`)}
+        </select>
+      </div>
 
-          <div class="field">
-            <label>System Instructions</label>
-            <textarea id="promptTextarea" rows="4">${this.systemPrompt}</textarea>
-          </div>
+      <div class="field" style="margin-top:16px;">
+        <label>System Instructions</label>
+        <textarea id="promptTextarea" rows="4">${this.systemPrompt}</textarea>
+      </div>
 
-          <div class="field">
-            <label>Gemini Voice (Diarization Switch)</label>
-            <select id="voiceSelect">
-              ${VOICE_MAP.map(v => html`<option value="${v.value}" ?selected=${this.selectedVoice === v.value}>${v.name}</option>`)}
-            </select>
-          </div>
+      <div class="field" style="margin-top:16px;">
+        <label>Translation Provider</label>
+        <select id="providerSelect">
+          ${PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedProvider === p.id}>${p.name}</option>`)}
+        </select>
+      </div>
 
-          <div class="field">
-            <label>Translation Provider</label>
-            <select id="providerSelect">
-              ${PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedProvider === p.id}>${p.name}</option>`)}
-            </select>
-          </div>
-
-          <div class="field">
-            <label>STT Provider</label>
-            <select id="sttProviderSelect">
-              ${STT_PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedSttProvider === p.id}>${p.name}</option>`)}
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Language A (Source)</label>
-            <select id="langASelect">
-              ${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langA === l.code}>${l.name}</option>`)}
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Language B (Target)</label>
-            <select id="langBSelect">
-              ${LANGUAGE_OPTIONS.map(l => html`<option value="${l.code}" ?selected=${this.langB === l.code}>${l.name}</option>`)}
-            </select>
-          </div>
-
-          <div class="modal-actions">
-            <button class="btn-cancel" @click=${this.toggleSettings}>Cancel</button>
-            <button class="btn-save" @click=${this.saveSettings}>Save Changes</button>
-          </div>
+      <div class="row" style="margin-top:20px;">
+        <div class="left">
+          <div class="name">Word Speed</div>
+          <div class="desc">Animated rendering pace</div>
         </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:12px; color:var(--muted);">${this.wordSpeedMs}ms</span>
+          <input type="range" min="25" max="140" .value=${this.wordSpeedMs} @input=${(e: any) => this.wordSpeedMs = e.target.value} />
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:24px;">
+        <button class="btn-save" @click=${this.saveSettings}>Apply All</button>
+      </div>
+    `;
+  }
+
+  private renderHistorySheet() {
+    return html`
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">Latest archives (white = transcript, lime = translation)</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${this.transcriptionHistory.slice(-10).reverse().map(h => html`
+          <div class="row" style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid ${h.type === 'agent' ? 'rgba(155,255,58,0.1)' : 'rgba(255,255,255,0.05)'}">
+            <div class="left">
+              <div class="name" style="${h.type === 'agent' ? 'color:var(--lime)' : ''}">
+                ${h.speaker === 0 ? 'Male' : 'Female'} 
+                <span style="opacity:0.4; font-weight:400; padding: 0 6px;">·</span> 
+                ${h.type === 'agent' ? 'Translation' : 'Transcription'}
+              </div>
+              <div class="desc" style="${h.type === 'agent' ? 'color:rgba(155,255,58,0.8)' : ''}">${h.text}</div>
+            </div>
+          </div>
+        `)}
+        ${this.transcriptionHistory.length === 0 ? html`<div class="desc" style="padding:24px; text-align:center; opacity:0.5;">No history record yet.</div>` : ''}
+      </div>
+      <div style="margin-top:16px; font-size:11px; color:var(--muted2); line-height:1.4;">
+        Note: Transcriptions and translations are persistency saved to Supabase for later retrieval.
+      </div>
+    `;
+  }
+
+  private renderParticipantsSheet() {
+    return html`
+      <div class="row">
+        <div class="left">
+          <div class="name">Classroom Default Mute</div>
+          <div class="desc">Auto-mute others in physical proximity to prevent feedback loops.</div>
+        </div>
+        <div class="toggle ${this.participantsMutedByDefault ? 'on' : ''}" @click=${() => this.participantsMutedByDefault = !this.participantsMutedByDefault}></div>
+      </div>
+      
+      <div style="margin-top:24px; font-size:11px; color:var(--muted); text-transform:uppercase; font-weight:700; letter-spacing:1px;">Active Roster</div>
+      <div class="row">
+        <div class="left"><div class="name">Teacher (Host)</div><div class="desc">Broadcasting live transcription</div></div>
+        <div style="color:var(--lime); font-size:11px; font-weight:800; background:rgba(155,255,58,0.1); padding:4px 8px; border-radius:6px;">LIVE</div>
+      </div>
+      <div class="row">
+        <div class="left"><div class="name">Classroom Speaker</div><div class="desc">Target output device</div></div>
+        <div style="color:var(--muted); font-size:11px; font-weight:700;">ACTIVE</div>
+      </div>
+      <div class="row" style="opacity:0.5;">
+        <div class="left"><div class="name">Student Device A</div><div class="desc">Listening only</div></div>
+        <div style="color:var(--muted); font-size:11px;">MUTED</div>
       </div>
     `;
   }
