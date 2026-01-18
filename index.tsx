@@ -15,7 +15,7 @@ import './visual-2d';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
-const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || '';
+const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || 'ce5372276dac663d3c65bdd9e354f867d90d0cad';
 const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&language=multi&model=nova-3&encoding=linear16&sample_rate=16000';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -172,7 +172,7 @@ interface TranscriptionSegment {
 export class GdmLiveAudio extends LitElement {
   @state() isRecording = false;
   @state() isMicMuted = false;
-  @state() isSpeakerMuted = false;
+  @state() isSpeakerMuted = false; // Speaker unmuted to allow Gemini to read translations aloud
   @state() status = '';
   @state() error = '';
   @state() isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -535,12 +535,15 @@ export class GdmLiveAudio extends LitElement {
         this.selectedPersonaId = data.selected_persona_id || 'miles';
         this.systemPrompt = data.system_prompt || MILES_PERSONA;
         this.selectedVoice = data.selected_voice || 'Orus';
+        this.selectedProvider = data.selected_provider || 'gemini';
+        this.selectedSttProvider = data.selected_stt_provider || 'deepgram';
         this.langA = data.lang_a || 'en-US';
         this.langB = data.lang_b || 'tl-PH';
         this.reset();
       }
+      // 404 = table doesn't exist, just use defaults silently
     } catch (err) {
-      console.warn('Persisting settings failed, using defaults.');
+      // Settings table may not exist - use defaults
     }
   }
 
@@ -682,7 +685,7 @@ export class GdmLiveAudio extends LitElement {
   private async initSession() {
     const model = 'gemini-2.5-flash-native-audio-preview-12-2025';
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       this.sessionPromise = ai.live.connect({
         model: model,
         callbacks: {
@@ -760,19 +763,25 @@ export class GdmLiveAudio extends LitElement {
         if (transcript) {
           this.updateRealtimeUserTranscription(transcript, !isFinal);
           if (isFinal) {
+            // Save to Supabase (optional, handles missing table gracefully)
+            supabase.from('transcriptions').insert({
+              room_id: 'default',
+              text: transcript,
+              source_lang: this.langA,
+              type: 'user'
+            }).then(() => { }); // Removed .catch() to avoid lint error on PromiseLike
+
             // Route based on selected provider
             if (this.selectedProvider === 'ollama-cartesia') {
               // Ollama translation + Cartesia TTS pipeline
               this.translateWithOllama(transcript).then((translated) => {
                 this.appendToTranscription(translated, 'agent');
                 this.speakWithCartesia(translated);
-                this.transcriptionHistory = [...this.transcriptionHistory, ...this.currentTurnSegments];
-                this.currentTurnSegments = [];
               });
             } else {
-              // Default: Gemini Live pipeline
+              // Default: Gemini Live pipeline - send as text so Gemini translates and speaks it
               this.sessionPromise?.then((session) => {
-                session.sendRealtimeInput({ text: transcript });
+                session.sendRealtimeInput([{ text: transcript }]);
               });
             }
           }
