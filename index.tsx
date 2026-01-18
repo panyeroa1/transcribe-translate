@@ -1106,7 +1106,28 @@ export class GdmLiveAudio extends LitElement {
 
           <div class="field">
             <label>System Instructions</label>
-            <textarea id="promptTextarea" rows="6">${this.systemPrompt}</textarea>
+            <textarea id="promptTextarea" rows="4">${this.systemPrompt}</textarea>
+          </div>
+
+          <div class="field">
+            <label>Gemini Voice (Diarization Switch)</label>
+            <select id="voiceSelect">
+              ${VOICE_MAP.map(v => html`<option value="${v.value}" ?selected=${this.selectedVoice === v.value}>${v.name}</option>`)}
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Translation Provider</label>
+            <select id="providerSelect">
+              ${PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedProvider === p.id}>${p.name}</option>`)}
+            </select>
+          </div>
+
+          <div class="field">
+            <label>STT Provider</label>
+            <select id="sttProviderSelect">
+              ${STT_PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedSttProvider === p.id}>${p.name}</option>`)}
+            </select>
           </div>
 
           <div class="field">
