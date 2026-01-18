@@ -185,6 +185,8 @@ export class GdmLiveAudio extends LitElement {
       --user-blue-soft: rgba(26, 115, 232, 0.1);
       --agent-purple: #9333ea;
       --agent-purple-soft: rgba(147, 51, 234, 0.1);
+      --transcription-text-color: #ffffff;
+      --translation-text-color: #32cd32;
       
       display: flex;
       flex-direction: column;
@@ -313,6 +315,14 @@ export class GdmLiveAudio extends LitElement {
       color: var(--agent-purple);
       border-bottom-right-radius: 4px;
       border: 1px solid rgba(147, 51, 234, 0.1);
+    }
+
+    .segment-user .segment-text {
+      color: var(--transcription-text-color);
+    }
+
+    .segment-agent .segment-text {
+      color: var(--translation-text-color);
     }
 
     .interim {
