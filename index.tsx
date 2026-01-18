@@ -16,7 +16,7 @@ import { Analyser } from './analyser';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
 const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || 'ce5372276dac663d3c65bdd9e354f867d90d0cad';
-const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&language=multi&model=nova-3&encoding=linear16&sample_rate=16000&sentiment=true';
+const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&detect_language=true&model=nova-3&encoding=linear16&sample_rate=16000&sentiment=true';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -85,8 +85,11 @@ OUTPUT (STRICT)
 - Do NOT mention “translation”, “speaker”, “lang”, or any system details.
 
 DIRECTION
-- If input is from Speaker A: translate from lang_A -> lang_B
-- If input is from Speaker B: translate from lang_B -> lang_A
+- Detect the language of the incoming speaker.
+- If input language matches lang_A: translate to lang_B
+- If input language matches lang_B: translate to lang_A
+- If input is from Speaker A but language is unknown: default to lang_B
+- If input is from Speaker B but language is unknown: default to lang_A
 
 FAITHFULNESS (UNCENSORED)
 - Translate faithfully and directly, preserving:
@@ -177,6 +180,7 @@ interface TranscriptionSegment {
   type: 'user' | 'agent';
   isInterim?: boolean;
   sentiment?: 'positive' | 'negative' | 'neutral';
+  language?: string;
 }
 
 @customElement('gdm-live-audio')
@@ -381,6 +385,17 @@ export class GdmLiveAudio extends LitElement {
       letter-spacing: 0.1em;
       opacity: 0.6;
       color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lang-badge {
+      font-size: 0.6rem;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
     }
 
     .transcription-word {
@@ -656,11 +671,11 @@ export class GdmLiveAudio extends LitElement {
   }
 
   // Ollama translation API
-  private async translateWithOllama(text: string): Promise<string> {
+  private async translateWithOllama(text: string, sourceLang: string, targetLang: string): Promise<string> {
     const payload = JSON.stringify({
       text,
-      source_lang: this.langA,
-      target_lang: this.langB
+      source_lang: sourceLang,
+      target_lang: targetLang
     });
     try {
       const res = await fetch('http://168.231.78.113:11434/api/chat', {
@@ -829,9 +844,11 @@ export class GdmLiveAudio extends LitElement {
         const transcript = alt.transcript;
         const isFinal = data.is_final;
         const sentiment = alt.sentiment as 'positive' | 'negative' | 'neutral' | undefined;
+        // Deepgram Nova-3 detected language code if available
+        const detectedLang = (data.metadata?.language || alt.language || 'en-US').toLowerCase();
 
         if (transcript) {
-          this.updateRealtimeUserTranscription(transcript, !isFinal, sentiment);
+          this.updateRealtimeUserTranscription(transcript, !isFinal, sentiment, detectedLang);
           if (isFinal) {
             this.lastSentiment = sentiment || 'neutral';
             // Finalize the current interim segment for the user
@@ -839,7 +856,8 @@ export class GdmLiveAudio extends LitElement {
               text: transcript,
               type: 'user',
               isInterim: false,
-              sentiment: sentiment || 'neutral'
+              sentiment: sentiment || 'neutral',
+              language: detectedLang
             }];
             this.currentTurnSegments = this.currentTurnSegments.filter(s => s.type !== 'user');
 
@@ -847,19 +865,24 @@ export class GdmLiveAudio extends LitElement {
             supabase.from('transcriptions').insert({
               room_id: 'default',
               text: transcript,
-              source_lang: this.langA,
+              source_lang: detectedLang,
               type: 'user'
             }).then(() => { });
 
+            // Dynamic Target Routing
+            // If we detected Lang A, translate to B. If we detected Lang B, translate to A.
+            // If it's something totally new, default to Lang A if it's not the detected one.
+            const targetLang = detectedLang.startsWith(this.langA.split('-')[0]) ? this.langB : this.langA;
+
             // Route based on selected provider
             if (this.selectedProvider === 'ollama-cartesia') {
-              this.translateWithOllama(transcript).then((translated) => {
-                this.appendToTranscription(translated, 'agent', sentiment);
+              this.translateWithOllama(transcript, detectedLang, targetLang).then((translated) => {
+                this.appendToTranscription(translated, 'agent', sentiment, targetLang);
                 this.speakWithCartesia(translated);
               });
             } else {
               this.sessionPromise?.then((session) => {
-                // We send the transcript; Gemini will infer sentiment from text cues
+                // Gemini is instructed to translate based on the detected source lang in context
                 session.sendRealtimeInput([{ text: transcript }]);
               });
             }
@@ -870,27 +893,27 @@ export class GdmLiveAudio extends LitElement {
     this.deepgramSocket.onerror = () => this.updateError('Audio pipeline error');
   }
 
-  private updateRealtimeUserTranscription(text: string, isInterim: boolean, sentiment?: 'positive' | 'negative' | 'neutral') {
+  private updateRealtimeUserTranscription(text: string, isInterim: boolean, sentiment?: 'positive' | 'negative' | 'neutral', language?: string) {
     const lastIdx = this.currentTurnSegments.length - 1;
     const lastSegment = this.currentTurnSegments[lastIdx];
     if (lastSegment && lastSegment.type === 'user') {
       const newSegments = [...this.currentTurnSegments];
-      newSegments[lastIdx] = { text, type: 'user', isInterim, sentiment };
+      newSegments[lastIdx] = { text, type: 'user', isInterim, sentiment, language: language || lastSegment.language };
       this.currentTurnSegments = newSegments;
     } else {
-      this.currentTurnSegments = [...this.currentTurnSegments, { text, type: 'user', isInterim, sentiment }];
+      this.currentTurnSegments = [...this.currentTurnSegments, { text, type: 'user', isInterim, sentiment, language }];
     }
   }
 
-  private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral') {
+  private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral', language?: string) {
     const lastIdx = this.currentTurnSegments.length - 1;
     const lastSegment = this.currentTurnSegments[lastIdx];
     if (lastSegment && lastSegment.type === type) {
       const newSegments = [...this.currentTurnSegments];
-      newSegments[lastIdx] = { ...lastSegment, text: lastSegment.text + text, isInterim: false, sentiment: sentiment || lastSegment.sentiment };
+      newSegments[lastIdx] = { ...lastSegment, text: lastSegment.text + text, isInterim: false, sentiment: sentiment || lastSegment.sentiment, language: language || lastSegment.language };
       this.currentTurnSegments = newSegments;
     } else {
-      this.currentTurnSegments = [...this.currentTurnSegments, { text, type, isInterim: false, sentiment }];
+      this.currentTurnSegments = [...this.currentTurnSegments, { text, type, isInterim: false, sentiment, language }];
     }
   }
 
@@ -971,7 +994,10 @@ export class GdmLiveAudio extends LitElement {
         <div class="transcription-container">
           ${allSegments.map((segment) => html`
             <div class="segment segment-${segment.type} ${segment.isInterim ? 'interim' : ''} sentiment-${segment.sentiment || 'neutral'}">
-              <div class="segment-label">${segment.type}</div>
+              <div class="segment-label">
+                ${segment.type}
+                ${segment.language ? html`<span class="lang-badge">${segment.language}</span>` : ''}
+              </div>
               <div class="segment-text">
                 ${segment.text.split(' ').map((word, i) => html`<span class="transcription-word" style="--word-index: ${i}">${word}</span>`)}
               </div>

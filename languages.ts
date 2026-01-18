@@ -181,10 +181,10 @@ export const LANGUAGES: Language[] = [
     { code: 'psp', name: 'Filipino Sign Language', vernacularName: 'FSL', script: 'ROMAN', direction: 'ltr', isSignLanguage: true },
     { code: 'vgt', name: 'Flemish Sign Language', vernacularName: 'VGT', script: 'ROMAN', direction: 'ltr', isSignLanguage: true },
     { code: 'dse', name: 'Dutch Sign Language', vernacularName: 'NGT', script: 'ROMAN', direction: 'ltr', isSignLanguage: true },
-];
+] as Language[];
 
 // Simple lookup for dropdown display
 export const LANGUAGE_OPTIONS = LANGUAGES.map(l => ({
     code: l.code,
     name: `${l.name} (${l.vernacularName})`
-}));
+})).sort((a, b) => a.name.localeCompare(b.name));
