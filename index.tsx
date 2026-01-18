@@ -13,11 +13,21 @@ import { createBlob, decode, decodeAudioData } from './utils';
 import { LANGUAGE_OPTIONS } from './languages';
 import './visual-2d';
 
-const SUPABASE_URL = 'https://xscdwdnjujpkczfhqrgu.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzY2R3ZG5qdWpwa2N6Zmhxcmd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMzEwNjgsImV4cCI6MjA3NjkwNzA2OH0.xuVAkWA5y1oDW_jC52I8JJXF-ovU-5LIBsY9yXzy6cA';
-const DEEPGRAM_KEY = 'e536ab54a70ac5c2ffa46cd843484fce0b8bbd7d';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_fc4iX_EGxN1Pzc4Py_SOog_8KJyvdQU';
+const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY || 'ce5372276dac663d3c65bdd9e354f867d90d0cad';
+const DEEPGRAM_ENDPOINT = 'wss://api.deepgram.com/v1/listen?endpointing=false&language=multi&model=nova-3&encoding=linear16&sample_rate=16000';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Anonymous auth on page load
+async function initAnonymousAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    await supabase.auth.signInAnonymously();
+  }
+}
+initAnonymousAuth();
 
 const MILES_PERSONA = `You are Miles — warm, upbeat, and neighborly (Sesame-inspired).
 * Mission: Help fast, kindly, and clearly. Sound naturally human in each language.
@@ -146,9 +156,9 @@ export class GdmLiveAudio extends LitElement {
 
   // Separated pipelines for input and output to prevent echo/interference
   private inputAudioContext = new (window.AudioContext ||
-    (window as any).webkitAudioContext)({ sampleRate: 16000 });
+    (window as any).webkitAudioContext)({ sampleRate: 16000, latencyHint: 'interactive' });
   private outputAudioContext = new (window.AudioContext ||
-    (window as any).webkitAudioContext)({ sampleRate: 24000 });
+    (window as any).webkitAudioContext)({ sampleRate: 24000, latencyHint: 'playback' });
 
   @state() inputNode = this.inputAudioContext.createGain();
   @state() outputNode = this.outputAudioContext.createGain();
@@ -157,6 +167,7 @@ export class GdmLiveAudio extends LitElement {
   private mediaStream: MediaStream | null = null;
   private sourceNode: MediaStreamAudioSourceNode | null = null;
   private scriptProcessorNode: ScriptProcessorNode | null = null;
+  private inputDestination: MediaStreamAudioDestinationNode | null = null;
   private sources = new Set<AudioBufferSourceNode>();
 
   static styles = css`
@@ -295,7 +306,7 @@ export class GdmLiveAudio extends LitElement {
     .segment-user {
       align-self: flex-start;
       background: var(--user-blue-soft);
-      color: var(--user-blue);
+      color: var(--transcription-text-color);
       border-bottom-left-radius: 4px;
       border: 1px solid rgba(26, 115, 232, 0.1);
     }
@@ -303,17 +314,9 @@ export class GdmLiveAudio extends LitElement {
     .segment-agent {
       align-self: flex-end;
       background: var(--agent-purple-soft);
-      color: var(--agent-purple);
+      color: var(--translation-text-color);
       border-bottom-right-radius: 4px;
       border: 1px solid rgba(147, 51, 234, 0.1);
-    }
-
-    .segment-user .segment-text {
-      color: var(--transcription-text-color);
-    }
-
-    .segment-agent .segment-text {
-      color: var(--translation-text-color);
     }
 
     .interim {
@@ -617,9 +620,12 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private async initDeepgram() {
-    const lang = this.langA || 'en-US';
-    // Enhanced VAD and multi-model parameters for higher accuracy
-    const url = `wss://api.deepgram.com/v1/listen?model=nova-3&encoding=linear16&sample_rate=16000&channels=1&language=${lang}&interim_results=true&smart_format=true&filler_words=true&no_delay=true&vad_events=true&utterance_end_ms=1000`;
+    if (!DEEPGRAM_KEY) {
+      this.updateError('Missing Deepgram API key');
+      return;
+    }
+    // Dedicated STT endpoint to keep input processing independent of TTS playback.
+    const url = `${DEEPGRAM_ENDPOINT}&channels=1&interim_results=true&smart_format=true&filler_words=true&no_delay=true&vad_events=true`;
 
     this.deepgramSocket = new WebSocket(url, ['token', DEEPGRAM_KEY]);
 
@@ -707,7 +713,10 @@ export class GdmLiveAudio extends LitElement {
       };
 
       this.inputNode.connect(this.scriptProcessorNode);
-      this.scriptProcessorNode.connect(this.inputAudioContext.destination);
+      if (!this.inputDestination) {
+        this.inputDestination = this.inputAudioContext.createMediaStreamDestination();
+      }
+      this.scriptProcessorNode.connect(this.inputDestination);
       this.isRecording = true;
       this.updateStatus('Listening...');
     } catch (err) {
