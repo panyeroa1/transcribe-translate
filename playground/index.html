@@ -512,62 +512,82 @@
         webSpeechStopBtn.onclick = stopWebSpeech;
 
         // --- Cartesia TTS Logic ---
-        const CARTESIA_API_KEY = localStorage.getItem('CARTESIA_API_KEY') || 'sk_car_oW2vqA4rhyZgZYkbYnPhcv'; // Default from .env
+        const CARTESIA_API_KEY = localStorage.getItem('CARTESIA_API_KEY') || 'sk_car_oW2vqA4rhyZgZYkbYnPhcv';
         const CARTESIA_VOICES = [
-            // English
-            { id: "79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e", name: "Theo - Modern Narrator", lang: "en" },
-            { id: "a167e0f3-df7e-4d52-a9c3-f949145efdab", name: "Blake - Helpful Agent", lang: "en" },
-            { id: "f786b574-daa5-4673-aa0c-cbe3e8534c02", name: "Katie - Friendly Fixer", lang: "en" },
-            { id: "e07c00bc-4134-4eae-9ea4-1a55fb45746b", name: "Brooke - Big Sister", lang: "en" },
-            { id: "829ccd10-f8b3-43cd-b8a0-4aeaa81f3b30", name: "Linda - Conversational Guide", lang: "en" },
-            // Spanish
-            { id: "15d0c2e2-8d29-44c3-be23-d585d5f154a1", name: "Pedro - Formal Speaker", lang: "es" },
-            { id: "5c5ad5e7-1020-476b-8b91-fdcbe9cc313c", name: "Daniela - Relaxed Woman", lang: "es" },
-            { id: "cefcb124-080b-4655-b31f-932f3ee743de", name: "Elena - Narrator", lang: "es" },
-            { id: "02aeee94-c02b-456e-be7a-659672acf82d", name: "Benito - Digital Voice", lang: "es" },
-            // French
-            { id: "0418348a-0ca2-4e90-9986-800fb8b3bbc0", name: "Antoine - Stern Man", lang: "fr" },
-            { id: "a8a1eb38-5f15-4c1d-8722-7ac0f329727d", name: "Calm French Woman", lang: "fr" },
-            { id: "ab636c8b-9960-4fb3-bb0c-b7b655fb9745", name: "Erwan - Everyday Speaker", lang: "fr" },
-            // German
-            { id: "b7187e84-fe22-4344-ba4a-bc013fcb533e", name: "Sebastian - Orator", lang: "de" },
-            { id: "38aabb6a-f52b-4fb0-a3d1-988518f4dc06", name: "Alina - Engaging Assistant", lang: "de" },
-            { id: "b9de4a89-2257-424b-94c2-db18ba68c81a", name: "Viktoria - Phone Conversationalist", lang: "de" },
-            { id: "384b625b-da5d-49e8-a76d-a2855d4f31eb", name: "Thomas - Anchor", lang: "de" },
-            { id: "4ab1ff51-476d-42bb-8019-4d315f7c0c05", name: "Lena - Muse", lang: "de" },
-            { id: "e00dd3df-19e7-4cd4-827a-7ff6687b6954", name: "Lukas - Professional", lang: "de" },
-            // Japanese
-            { id: "2b568345-1d48-4047-b25f-7baccf842eb0", name: "Yumiko - Friendly Agent", lang: "ja" },
-            { id: "e8a863c6-22c7-4671-86ca-91cacffc038d", name: "Daisuke - Businessman", lang: "ja" },
-            { id: "59d4fd2f-f5eb-4410-8105-58db7661144f", name: "Yuki - Calm Woman", lang: "ja" },
-            { id: "498e7f37-7fa3-4e2c-b8e2-8b6e9276f956", name: "Aiko - Calming Voice", lang: "ja" },
-            // Korean
-            { id: "304fdbd8-65e6-40d6-ab78-f9d18b9efdf9", name: "Jihyun - Anchorwoman", lang: "ko" },
-            { id: "af6beeea-d732-40b6-8292-73af0035b740", name: "Byungtae - Enforcer", lang: "ko" },
-            { id: "15628352-2ede-4f1b-89e6-ceda0c983fbc", name: "Jiwoo - Service Specialist", lang: "ko" },
-            // Chinese (mapped to zh)
-            // Arabic
-            { id: "002622d8-19d0-4567-a16a-f99c7397c062", name: "Huda - Approachable Speaker", lang: "ar" },
-            { id: "fc923f89-1de5-4ddf-b93c-6da2ba63428a", name: "Nour - Engaging Speaker", lang: "ar" },
-            { id: "f1cdfb4a-bf7d-4e83-916e-8f0802278315", name: "Walid - Steady Presence", lang: "ar" },
-            { id: "664aec8a-64a4-4437-8a0b-a61aa4f51fe6", name: "Hassan - Authoritative Narrator", lang: "ar" },
-            { id: "b0aa4612-81d2-4df3-9730-3fc064754b1f", name: "Khalid - Bright Energy", lang: "ar" },
-            // Hindi
-            { id: "faf0731e-dfb9-4cfc-8119-259a79b27e12", name: "Riya - College Roommate", lang: "hi" },
-            { id: "95d51f79-c397-46f9-b49a-23763d3eaa2d", name: "Arushi - Hinglish Speaker", lang: "hi" },
-            { id: "bec003e2-3cb3-429c-8468-206a393c67ad", name: "Parvati - Friendly Supporter", lang: "hi" },
-            { id: "28ca2041-5dda-42df-8123-f58ea9c3da00", name: "Palak - Presenter", lang: "hi" },
-            { id: "7e8cb11d-37af-476b-ab8f-25da99b18644", name: "Anuj - Engaging Narrator", lang: "hi" },
-            { id: "47f3bbb1-e98f-4e0c-92c5-5f0325e1e206", name: "Neha - Virtual Assistant", lang: "hi" },
-            { id: "6303e5fb-a0a7-48f9-bb1a-dd42c216dc5d", name: "Sagar - Helpful Friend", lang: "hi" },
-            // Portuguese
-            { id: "6a360542-a117-4ed5-9e09-e8bf9b05eabb", name: "Tiago - Narration Expert", lang: "pt" },
-            { id: "d4b44b9a-82bc-4b65-b456-763fce4c52f9", name: "Beatriz - Support Guide", lang: "pt" },
-            { id: "700d1ee3-a641-4018-ba6e-899dcadc9e2b", name: "Luana - Public Speaker", lang: "pt" },
-            // Tamil
-            { id: "25d2c432-139c-4035-bfd6-9baaabcdd006", name: "Kavya - Warm Presence", lang: "ta" },
-            // Telugu
-            { id: "07bc462a-c644-49f1-baf7-82d5599131be", name: "Sindhu - Conversational Partner", lang: "te" }
+            // PRIORITY: Dutch/Flemish (nl)
+            // Note: Cartesia doesn't have native Dutch voices yet. Using multilingual English with clear pronunciation as fallback.
+            
+            // PRIORITY: French (fr) - Male & Female pairs
+            { id: "0418348a-0ca2-4e90-9986-800fb8b3bbc0", name: "Antoine - Stern Man (M)", lang: "fr", gender: "M" },
+            { id: "a8a1eb38-5f15-4c1d-8722-7ac0f329727d", name: "Calm French Woman (F)", lang: "fr", gender: "F" },
+            { id: "ab636c8b-9960-4fb3-bb0c-b7b655fb9745", name: "Erwan - Everyday Speaker (M)", lang: "fr", gender: "M" },
+            
+            // PRIORITY: Tagalog/Filipino (tl) - Using English voices for Philippines
+            // Note: No native Tagalog in Cartesia. Using clear English voices suitable for Filipino market.
+            { id: "79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e", name: "Theo - Modern Narrator (M)", lang: "tl", gender: "M" },
+            { id: "f786b574-daa5-4673-aa0c-cbe3e8534c02", name: "Katie - Friendly Fixer (F)", lang: "tl", gender: "F" },
+            { id: "a167e0f3-df7e-4d52-a9c3-f949145efdab", name: "Blake - Helpful Agent (M)", lang: "tl", gender: "M" },
+            { id: "e07c00bc-4134-4eae-9ea4-1a55fb45746b", name: "Brooke - Big Sister (F)", lang: "tl", gender: "F" },
+            
+            // PRIORITY: Spanish (es) - Male & Female pairs for Spain & Latin America
+            { id: "15d0c2e2-8d29-44c3-be23-d585d5f154a1", name: "Pedro - Formal Speaker (M)", lang: "es", gender: "M" },
+            { id: "5c5ad5e7-1020-476b-8b91-fdcbe9cc313c", name: "Daniela - Relaxed Woman (F)", lang: "es", gender: "F" },
+            { id: "02aeee94-c02b-456e-be7a-659672acf82d", name: "Benito - Digital Voice (M)", lang: "es", gender: "M" },
+            { id: "cefcb124-080b-4655-b31f-932f3ee743de", name: "Elena - Narrator (F)", lang: "es", gender: "F" },
+            
+            // English (en) - Balanced Male & Female
+            { id: "79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e", name: "Theo - Modern Narrator (M)", lang: "en", gender: "M" },
+            { id: "f786b574-daa5-4673-aa0c-cbe3e8534c02", name: "Katie - Friendly Fixer (F)", lang: "en", gender: "F" },
+            { id: "a167e0f3-df7e-4d52-a9c3-f949145efdab", name: "Blake - Helpful Agent (M)", lang: "en", gender: "M" },
+            { id: "e07c00bc-4134-4eae-9ea4-1a55fb45746b", name: "Brooke - Big Sister (F)", lang: "en", gender: "F" },
+            { id: "5ee9feff-1265-424a-9d7f-8e4d431a12c7", name: "Ronald - Thinker (M)", lang: "en", gender: "M" },
+            { id: "829ccd10-f8b3-43cd-b8a0-4aeaa81f3b30", name: "Linda - Conversational Guide (F)", lang: "en", gender: "F" },
+            
+            // German (de) - Male & Female balanced
+            { id: "b7187e84-fe22-4344-ba4a-bc013fcb533e", name: "Sebastian - Orator (M)", lang: "de", gender: "M" },
+            { id: "38aabb6a-f52b-4fb0-a3d1-988518f4dc06", name: "Alina - Engaging Assistant (F)", lang: "de", gender: "F" },
+            { id: "384b625b-da5d-49e8-a76d-a2855d4f31eb", name: "Thomas - Anchor (M)", lang: "de", gender: "M" },
+            { id: "b9de4a89-2257-424b-94c2-db18ba68c81a", name: "Viktoria - Phone Conversationalist (F)", lang: "de", gender: "F" },
+            { id: "e00dd3df-19e7-4cd4-827a-7ff6687b6954", name: "Lukas - Professional (M)", lang: "de", gender: "M" },
+            { id: "4ab1ff51-476d-42bb-8019-4d315f7c0c05", name: "Lena - Muse (F)", lang: "de", gender: "F" },
+            
+            // Japanese (ja) - Male & Female balanced
+            { id: "e8a863c6-22c7-4671-86ca-91cacffc038d", name: "Daisuke - Businessman (M)", lang: "ja", gender: "M" },
+            { id: "2b568345-1d48-4047-b25f-7baccf842eb0", name: "Yumiko - Friendly Agent (F)", lang: "ja", gender: "F" },
+            { id: "59d4fd2f-f5eb-4410-8105-58db7661144f", name: "Yuki - Calm Woman (F)", lang: "ja", gender: "F" },
+            { id: "498e7f37-7fa3-4e2c-b8e2-8b6e9276f956", name: "Aiko - Calming Voice (F)", lang: "ja", gender: "F" },
+            
+            // Korean (ko) - Male & Female balanced
+            { id: "af6beeea-d732-40b6-8292-73af0035b740", name: "Byungtae - Enforcer (M)", lang: "ko", gender: "M" },
+            { id: "304fdbd8-65e6-40d6-ab78-f9d18b9efdf9", name: "Jihyun - Anchorwoman (F)", lang: "ko", gender: "F" },
+            { id: "15628352-2ede-4f1b-89e6-ceda0c983fbc", name: "Jiwoo - Service Specialist (F)", lang: "ko", gender: "F" },
+            
+            // Arabic (ar) - Male & Female balanced
+            { id: "f1cdfb4a-bf7d-4e83-916e-8f0802278315", name: "Walid - Steady Presence (M)", lang: "ar", gender: "M" },
+            { id: "002622d8-19d0-4567-a16a-f99c7397c062", name: "Huda - Approachable Speaker (F)", lang: "ar", gender: "F" },
+            { id: "664aec8a-64a4-4437-8a0b-a61aa4f51fe6", name: "Hassan - Authoritative Narrator (M)", lang: "ar", gender: "M" },
+            { id: "fc923f89-1de5-4ddf-b93c-6da2ba63428a", name: "Nour - Engaging Speaker (F)", lang: "ar", gender: "F" },
+            { id: "b0aa4612-81d2-4df3-9730-3fc064754b1f", name: "Khalid - Bright Energy (M)", lang: "ar", gender: "M" },
+            
+            // Hindi (hi) - Male & Female balanced
+            { id: "6303e5fb-a0a7-48f9-bb1a-dd42c216dc5d", name: "Sagar - Helpful Friend (M)", lang: "hi", gender: "M" },
+            { id: "faf0731e-dfb9-4cfc-8119-259a79b27e12", name: "Riya - College Roommate (F)", lang: "hi", gender: "F" },
+            { id: "7e8cb11d-37af-476b-ab8f-25da99b18644", name: "Anuj - Engaging Narrator (M)", lang: "hi", gender: "M" },
+            { id: "bec003e2-3cb3-429c-8468-206a393c67ad", name: "Parvati - Friendly Supporter (F)", lang: "hi", gender: "F" },
+            { id: "47f3bbb1-e98f-4e0c-92c5-5f0325e1e206", name: "Neha - Virtual Assistant (F)", lang: "hi", gender: "F" },
+            { id: "95d51f79-c397-46f9-b49a-23763d3eaa2d", name: "Arushi - Hinglish Speaker (F)", lang: "hi", gender: "F" },
+            { id: "28ca2041-5dda-42df-8123-f58ea9c3da00", name: "Palak - Presenter (F)", lang: "hi", gender: "F" },
+            
+            // Portuguese (pt) - Male & Female balanced
+            { id: "6a360542-a117-4ed5-9e09-e8bf9b05eabb", name: "Tiago - Narration Expert (M)", lang: "pt", gender: "M" },
+            { id: "d4b44b9a-82bc-4b65-b456-763fce4c52f9", name: "Beatriz - Support Guide (F)", lang: "pt", gender: "F" },
+            { id: "700d1ee3-a641-4018-ba6e-899dcadc9e2b", name: "Luana - Public Speaker (F)", lang: "pt", gender: "F" },
+            
+            // Tamil (ta)
+            { id: "25d2c432-139c-4035-bfd6-9baaabcdd006", name: "Kavya - Warm Presence (F)", lang: "ta", gender: "F" },
+            
+            // Telugu (te)
+            { id: "07bc462a-c644-49f1-baf7-82d5599131be", name: "Sindhu - Conversational Partner (F)", lang: "te", gender: "F" }
         ];
 
         const ttsLang = document.getElementById('ttsLang');
@@ -580,8 +600,14 @@
         function filterVoices() {
             const lang = ttsLang.value;
             const filtered = CARTESIA_VOICES.filter(v => v.lang === lang);
+            
+            // Show gender balance info
+            const males = filtered.filter(v => v.gender === 'M').length;
+            const females = filtered.filter(v => v.gender === 'F').length;
+            
             ttsVoice.innerHTML = filtered.length 
-                ? filtered.map(v => `<option value="${v.id}">${v.name}</option>`).join('')
+                ? `<option value="">Choose voice (${males}M / ${females}F)</option>` + 
+                  filtered.map(v => `<option value="${v.id}">${v.name}</option>`).join('')
                 : '<option value="">No voices for this language</option>';
         }
         filterVoices(); // Initial load
