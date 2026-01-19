@@ -145,6 +145,7 @@
         <div class="nav-item active" onclick="showSection('llm')">Ollama LLM</div>
         <div class="nav-item" onclick="showSection('whisper')">Whisper STT</div>
         <div class="nav-item" onclick="showSection('webspeech')">Web Speech API</div>
+        <div class="nav-item" onclick="showSection('tts')">Cartesia TTS</div>
     </div>
 
     <div class="main">
@@ -154,6 +155,7 @@
                 <option value="llm">Ollama LLM</option>
                 <option value="whisper">Whisper STT (VPS)</option>
                 <option value="webspeech">Web Speech API (Browser)</option>
+                <option value="tts">Cartesia TTS</option>
             </select>
         </div>
 
@@ -233,6 +235,50 @@
             <div class="log-area" id="webSpeechLog">
                 <div class="log-entry msg-placeholder">Speech results will appear here...</div>
             </div>
+        </div>
+
+        <!-- Cartesia TTS Section -->
+        <div id="tts" class="section">
+            <h2>Cartesia Text-to-Speech</h2>
+            <p class="api-docs-meta">Test TTS with language and voice pairing from the main app.</p>
+
+            <div class="form-group">
+                <label>Language</label>
+                <select id="ttsLang" aria-label="Select Language" onchange="filterVoices()">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                    <option value="ar">Arabic</option>
+                    <option value="hi">Hindi</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ta">Tamil</option>
+                    <option value="te">Telugu</option>
+                    <option value="tl">Tagalog</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Voice</label>
+                <select id="ttsVoice" aria-label="Select Voice">
+                    <option value="">Loading voices...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Text to Speak</label>
+                <textarea id="ttsText" placeholder="Enter text to synthesize..."></textarea>
+            </div>
+
+            <div class="button-row">
+                <button id="ttsSpeakBtn">Speak</button>
+                <button id="ttsStopBtn" class="danger" disabled>Stop</button>
+            </div>
+
+            <audio id="ttsAudio" controls class="response-container"></audio>
         </div>
     </div>
 
@@ -464,6 +510,131 @@
 
         webSpeechStartBtn.onclick = startWebSpeech;
         webSpeechStopBtn.onclick = stopWebSpeech;
+
+        // --- Cartesia TTS Logic ---
+        const CARTESIA_API_KEY = localStorage.getItem('CARTESIA_API_KEY') || 'sk_car_oW2vqA4rhyZgZYkbYnPhcv'; // Default from .env
+        const CARTESIA_VOICES = [
+            // English
+            { id: "79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e", name: "Theo - Modern Narrator", lang: "en" },
+            { id: "a167e0f3-df7e-4d52-a9c3-f949145efdab", name: "Blake - Helpful Agent", lang: "en" },
+            { id: "f786b574-daa5-4673-aa0c-cbe3e8534c02", name: "Katie - Friendly Fixer", lang: "en" },
+            { id: "e07c00bc-4134-4eae-9ea4-1a55fb45746b", name: "Brooke - Big Sister", lang: "en" },
+            { id: "829ccd10-f8b3-43cd-b8a0-4aeaa81f3b30", name: "Linda - Conversational Guide", lang: "en" },
+            // Spanish
+            { id: "15d0c2e2-8d29-44c3-be23-d585d5f154a1", name: "Pedro - Formal Speaker", lang: "es" },
+            { id: "5c5ad5e7-1020-476b-8b91-fdcbe9cc313c", name: "Daniela - Relaxed Woman", lang: "es" },
+            { id: "cefcb124-080b-4655-b31f-932f3ee743de", name: "Elena - Narrator", lang: "es" },
+            { id: "02aeee94-c02b-456e-be7a-659672acf82d", name: "Benito - Digital Voice", lang: "es" },
+            // French
+            { id: "0418348a-0ca2-4e90-9986-800fb8b3bbc0", name: "Antoine - Stern Man", lang: "fr" },
+            { id: "a8a1eb38-5f15-4c1d-8722-7ac0f329727d", name: "Calm French Woman", lang: "fr" },
+            { id: "ab636c8b-9960-4fb3-bb0c-b7b655fb9745", name: "Erwan - Everyday Speaker", lang: "fr" },
+            // German
+            { id: "b7187e84-fe22-4344-ba4a-bc013fcb533e", name: "Sebastian - Orator", lang: "de" },
+            { id: "38aabb6a-f52b-4fb0-a3d1-988518f4dc06", name: "Alina - Engaging Assistant", lang: "de" },
+            { id: "b9de4a89-2257-424b-94c2-db18ba68c81a", name: "Viktoria - Phone Conversationalist", lang: "de" },
+            { id: "384b625b-da5d-49e8-a76d-a2855d4f31eb", name: "Thomas - Anchor", lang: "de" },
+            { id: "4ab1ff51-476d-42bb-8019-4d315f7c0c05", name: "Lena - Muse", lang: "de" },
+            { id: "e00dd3df-19e7-4cd4-827a-7ff6687b6954", name: "Lukas - Professional", lang: "de" },
+            // Japanese
+            { id: "2b568345-1d48-4047-b25f-7baccf842eb0", name: "Yumiko - Friendly Agent", lang: "ja" },
+            { id: "e8a863c6-22c7-4671-86ca-91cacffc038d", name: "Daisuke - Businessman", lang: "ja" },
+            { id: "59d4fd2f-f5eb-4410-8105-58db7661144f", name: "Yuki - Calm Woman", lang: "ja" },
+            { id: "498e7f37-7fa3-4e2c-b8e2-8b6e9276f956", name: "Aiko - Calming Voice", lang: "ja" },
+            // Korean
+            { id: "304fdbd8-65e6-40d6-ab78-f9d18b9efdf9", name: "Jihyun - Anchorwoman", lang: "ko" },
+            { id: "af6beeea-d732-40b6-8292-73af0035b740", name: "Byungtae - Enforcer", lang: "ko" },
+            { id: "15628352-2ede-4f1b-89e6-ceda0c983fbc", name: "Jiwoo - Service Specialist", lang: "ko" },
+            // Chinese (mapped to zh)
+            // Arabic
+            { id: "002622d8-19d0-4567-a16a-f99c7397c062", name: "Huda - Approachable Speaker", lang: "ar" },
+            { id: "fc923f89-1de5-4ddf-b93c-6da2ba63428a", name: "Nour - Engaging Speaker", lang: "ar" },
+            { id: "f1cdfb4a-bf7d-4e83-916e-8f0802278315", name: "Walid - Steady Presence", lang: "ar" },
+            { id: "664aec8a-64a4-4437-8a0b-a61aa4f51fe6", name: "Hassan - Authoritative Narrator", lang: "ar" },
+            { id: "b0aa4612-81d2-4df3-9730-3fc064754b1f", name: "Khalid - Bright Energy", lang: "ar" },
+            // Hindi
+            { id: "faf0731e-dfb9-4cfc-8119-259a79b27e12", name: "Riya - College Roommate", lang: "hi" },
+            { id: "95d51f79-c397-46f9-b49a-23763d3eaa2d", name: "Arushi - Hinglish Speaker", lang: "hi" },
+            { id: "bec003e2-3cb3-429c-8468-206a393c67ad", name: "Parvati - Friendly Supporter", lang: "hi" },
+            { id: "28ca2041-5dda-42df-8123-f58ea9c3da00", name: "Palak - Presenter", lang: "hi" },
+            { id: "7e8cb11d-37af-476b-ab8f-25da99b18644", name: "Anuj - Engaging Narrator", lang: "hi" },
+            { id: "47f3bbb1-e98f-4e0c-92c5-5f0325e1e206", name: "Neha - Virtual Assistant", lang: "hi" },
+            { id: "6303e5fb-a0a7-48f9-bb1a-dd42c216dc5d", name: "Sagar - Helpful Friend", lang: "hi" },
+            // Portuguese
+            { id: "6a360542-a117-4ed5-9e09-e8bf9b05eabb", name: "Tiago - Narration Expert", lang: "pt" },
+            { id: "d4b44b9a-82bc-4b65-b456-763fce4c52f9", name: "Beatriz - Support Guide", lang: "pt" },
+            { id: "700d1ee3-a641-4018-ba6e-899dcadc9e2b", name: "Luana - Public Speaker", lang: "pt" },
+            // Tamil
+            { id: "25d2c432-139c-4035-bfd6-9baaabcdd006", name: "Kavya - Warm Presence", lang: "ta" },
+            // Telugu
+            { id: "07bc462a-c644-49f1-baf7-82d5599131be", name: "Sindhu - Conversational Partner", lang: "te" }
+        ];
+
+        const ttsLang = document.getElementById('ttsLang');
+        const ttsVoice = document.getElementById('ttsVoice');
+        const ttsText = document.getElementById('ttsText');
+        const ttsSpeakBtn = document.getElementById('ttsSpeakBtn');
+        const ttsStopBtn = document.getElementById('ttsStopBtn');
+        const ttsAudio = document.getElementById('ttsAudio');
+
+        function filterVoices() {
+            const lang = ttsLang.value;
+            const filtered = CARTESIA_VOICES.filter(v => v.lang === lang);
+            ttsVoice.innerHTML = filtered.length 
+                ? filtered.map(v => `<option value="${v.id}">${v.name}</option>`).join('')
+                : '<option value="">No voices for this language</option>';
+        }
+        filterVoices(); // Initial load
+
+        ttsSpeakBtn.onclick = async () => {
+            const voiceId = ttsVoice.value;
+            const text = ttsText.value.trim();
+            if (!voiceId || !text) return alert("Select voice and enter text");
+
+            ttsSpeakBtn.disabled = true;
+            ttsStopBtn.disabled = false;
+
+            try {
+                const res = await fetch("https://api.cartesia.ai/tts/bytes", {
+                    method: "POST",
+                    headers: {
+                        "Cartesia-Version": "2025-04-16",
+                        "X-API-Key": CARTESIA_API_KEY,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model_id: "sonic-3-latest",
+                        transcript: text,
+                        voice: { mode: "id", id: voiceId },
+                        output_format: { container: "mp3", bit_rate: 128000 }
+                    })
+                });
+
+                if (!res.ok) throw new Error(`Cartesia error: ${res.status}`);
+
+                const blob = await res.blob();
+                ttsAudio.src = URL.createObjectURL(blob);
+                ttsAudio.play();
+            } catch (err) {
+                alert("TTS Error: " + err.message);
+            } finally {
+                ttsSpeakBtn.disabled = false;
+                ttsStopBtn.disabled = true;
+            }
+        };
+
+        ttsStopBtn.onclick = () => {
+            ttsAudio.pause();
+            ttsAudio.currentTime = 0;
+            ttsStopBtn.disabled = true;
+        };
+
+        // Update showSection for TTS
+        const originalShowSection = showSection;
+        window.showSection = function(id) {
+            originalShowSection(id);
+            if (id === 'tts') document.querySelectorAll('.nav-item')[3].classList.add('active');
+        };
 
     </script>
 </body>
