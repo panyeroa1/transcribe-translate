@@ -338,9 +338,8 @@ ui.micBtn.onclick = async () => {
         isMic = true; ui.micBtn.classList.add('mic-active'); ui.micBtn.querySelector('span').textContent = "Listening...";
         
         let lang = ui.srcLang.value;
-        // FIX: Using nova-3 and language=multi for auto-detection in streaming
-        let url = `wss://api.deepgram.com/v1/listen?model=nova-3&smart_format=true&interim_results=false`;
-        if(lang === 'auto') url += `&language=multi`; else url += `&language=${lang === 'tl' ? 'fil' : lang}`;
+        // Explicit Deepgram Configuration
+        const url = `wss://api.deepgram.com/v1/listen?model=nova-3&language=multi&punctuate=true&diarize=false&smart_format=true&interim_results=false`;
         
         dg = new WebSocket(url, ['token', DEEPGRAM_KEY]);
         dg.onopen = () => { 
