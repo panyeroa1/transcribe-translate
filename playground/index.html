@@ -245,9 +245,11 @@
             <div class="form-group">
                 <label>Language</label>
                 <select id="ttsLang" aria-label="Select Language" onchange="filterVoices()">
+                    <option value="nl">Dutch/Flemish ⭐</option>
+                    <option value="fr">French ⭐</option>
+                    <option value="tl">Tagalog/Filipino ⭐</option>
+                    <option value="es">Spanish ⭐</option>
                     <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
                     <option value="de">German</option>
                     <option value="ja">Japanese</option>
                     <option value="ko">Korean</option>
@@ -257,7 +259,6 @@
                     <option value="pt">Portuguese</option>
                     <option value="ta">Tamil</option>
                     <option value="te">Telugu</option>
-                    <option value="tl">Tagalog</option>
                 </select>
             </div>
 
@@ -514,9 +515,12 @@
         // --- Cartesia TTS Logic ---
         const CARTESIA_API_KEY = localStorage.getItem('CARTESIA_API_KEY') || 'sk_car_oW2vqA4rhyZgZYkbYnPhcv';
         const CARTESIA_VOICES = [
-            // PRIORITY: Dutch/Flemish (nl)
-            // Note: Cartesia doesn't have native Dutch voices yet. Using multilingual English with clear pronunciation as fallback.
-            
+            // PRIORITY: Dutch/Flemish (nl) - Using Multilingual Model with these voices
+            { id: "79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e", name: "Theo - Modern Narrator (M)", lang: "nl", gender: "M" },
+            { id: "e07c00bc-4134-4eae-9ea4-1a55fb45746b", name: "Brooke - Big Sister (F)", lang: "nl", gender: "F" },
+            { id: "a167e0f3-df7e-4d52-a9c3-f949145efdab", name: "Blake - Helpful Agent (M)", lang: "nl", gender: "M" },
+            { id: "f786b574-daa5-4673-aa0c-cbe3e8534c02", name: "Katie - Friendly Fixer (F)", lang: "nl", gender: "F" },
+
             // PRIORITY: French (fr) - Male & Female pairs
             { id: "0418348a-0ca2-4e90-9986-800fb8b3bbc0", name: "Antoine - Stern Man (M)", lang: "fr", gender: "M" },
             { id: "a8a1eb38-5f15-4c1d-8722-7ac0f329727d", name: "Calm French Woman (F)", lang: "fr", gender: "F" },
