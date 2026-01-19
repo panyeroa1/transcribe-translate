@@ -67,6 +67,7 @@
     .share-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .share-icon { width: 16px; height: 16px; fill: #888; }
     .btn-leave { background: #dc2626 !important; }
+    .btn-leave .share-icon { fill: white; }
 
     .chat-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
     .msg-item { display: flex; flex-direction: column; gap: 4px; }
@@ -134,7 +135,7 @@
     <span id="roomIdDisplay" class="room-id">...</span>
     <div class="share-row">
       <button class="share-btn" id="copyBtn" aria-label="Copy Room ID"><svg class="share-icon" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 00-2 2v14h2V3h12V1zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
-      <button class="share-btn btn-leave" onclick="location.reload()" aria-label="Leave Room"><svg class="share-icon" style="fill:white" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/></svg></button>
+      <button class="share-btn btn-leave" onclick="location.reload()" aria-label="Leave Room"><svg class="share-icon" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/></svg></button>
     </div>
   </div>
 
