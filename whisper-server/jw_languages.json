@@ -1,0 +1,3092 @@
+[
+  {
+    "code": "aba",
+    "name": "aba",
+    "jwUrl": "https://www.jw.org/aba/"
+  },
+  {
+    "code": "ab",
+    "name": "Abkhazian",
+    "jwUrl": "https://www.jw.org/ab/"
+  },
+  {
+    "code": "abn",
+    "name": "abn",
+    "jwUrl": "https://www.jw.org/abn/"
+  },
+  {
+    "code": "abx",
+    "name": "abx",
+    "jwUrl": "https://www.jw.org/abx/"
+  },
+  {
+    "code": "abz",
+    "name": "abz",
+    "jwUrl": "https://www.jw.org/abz/"
+  },
+  {
+    "code": "acf",
+    "name": "acf",
+    "jwUrl": "https://www.jw.org/acf/"
+  },
+  {
+    "code": "ach",
+    "name": "Acoli",
+    "jwUrl": "https://www.jw.org/ach/"
+  },
+  {
+    "code": "acr",
+    "name": "acr",
+    "jwUrl": "https://www.jw.org/acr/"
+  },
+  {
+    "code": "ada",
+    "name": "Adangme",
+    "jwUrl": "https://www.jw.org/ada/"
+  },
+  {
+    "code": "aed",
+    "name": "aed",
+    "jwUrl": "https://www.jw.org/aed/"
+  },
+  {
+    "code": "aen",
+    "name": "aen",
+    "jwUrl": "https://www.jw.org/aen/"
+  },
+  {
+    "code": "af",
+    "name": "Afrikaans",
+    "jwUrl": "https://www.jw.org/af/"
+  },
+  {
+    "code": "agr",
+    "name": "agr",
+    "jwUrl": "https://www.jw.org/agr/"
+  },
+  {
+    "code": "aha",
+    "name": "aha",
+    "jwUrl": "https://www.jw.org/aha/"
+  },
+  {
+    "code": "ahk",
+    "name": "ahk",
+    "jwUrl": "https://www.jw.org/ahk/"
+  },
+  {
+    "code": "ajg",
+    "name": "ajg",
+    "jwUrl": "https://www.jw.org/ajg/"
+  },
+  {
+    "code": "tw",
+    "name": "Akan",
+    "jwUrl": "https://www.jw.org/tw/"
+  },
+  {
+    "code": "fat",
+    "name": "Akan",
+    "jwUrl": "https://www.jw.org/fat/"
+  },
+  {
+    "code": "akl",
+    "name": "akl",
+    "jwUrl": "https://www.jw.org/akl/"
+  },
+  {
+    "code": "sq",
+    "name": "Albanian",
+    "jwUrl": "https://www.jw.org/sq/"
+  },
+  {
+    "code": "alz",
+    "name": "alz",
+    "jwUrl": "https://www.jw.org/alz/"
+  },
+  {
+    "code": "am",
+    "name": "Amharic",
+    "jwUrl": "https://www.jw.org/am/"
+  },
+  {
+    "code": "ami",
+    "name": "ami",
+    "jwUrl": "https://www.jw.org/ami/"
+  },
+  {
+    "code": "amu",
+    "name": "amu",
+    "jwUrl": "https://www.jw.org/amu/"
+  },
+  {
+    "code": "aoc",
+    "name": "aoc",
+    "jwUrl": "https://www.jw.org/aoc/"
+  },
+  {
+    "code": "apc",
+    "name": "apc",
+    "jwUrl": "https://www.jw.org/apc/"
+  },
+  {
+    "code": "apd",
+    "name": "apd",
+    "jwUrl": "https://www.jw.org/apd/"
+  },
+  {
+    "code": "ar",
+    "name": "Arabic",
+    "jwUrl": "https://www.jw.org/ar/"
+  },
+  {
+    "code": "arh",
+    "name": "arh",
+    "jwUrl": "https://www.jw.org/arh/"
+  },
+  {
+    "code": "hy",
+    "name": "Armenian",
+    "jwUrl": "https://www.jw.org/hy/"
+  },
+  {
+    "code": "arn-x-phn",
+    "name": "arn-x-phn",
+    "jwUrl": "https://www.jw.org/arn-x-phn/"
+  },
+  {
+    "code": "asf",
+    "name": "asf",
+    "jwUrl": "https://www.jw.org/asf/"
+  },
+  {
+    "code": "asq",
+    "name": "asq",
+    "jwUrl": "https://www.jw.org/asq/"
+  },
+  {
+    "code": "as",
+    "name": "Assamese",
+    "jwUrl": "https://www.jw.org/as/"
+  },
+  {
+    "code": "ati",
+    "name": "ati",
+    "jwUrl": "https://www.jw.org/ati/"
+  },
+  {
+    "code": "ay",
+    "name": "Aymara",
+    "jwUrl": "https://www.jw.org/ay/"
+  },
+  {
+    "code": "azb",
+    "name": "azb",
+    "jwUrl": "https://www.jw.org/azb/"
+  },
+  {
+    "code": "az",
+    "name": "Azerbaijani",
+    "jwUrl": "https://www.jw.org/az/"
+  },
+  {
+    "code": "az-cyrl",
+    "name": "Azerbaijani (Cyrillic)",
+    "jwUrl": "https://www.jw.org/az-cyrl/"
+  },
+  {
+    "code": "ban",
+    "name": "Balinese",
+    "jwUrl": "https://www.jw.org/ban/"
+  },
+  {
+    "code": "bm",
+    "name": "Bambara",
+    "jwUrl": "https://www.jw.org/bm/"
+  },
+  {
+    "code": "bn",
+    "name": "Bangla",
+    "jwUrl": "https://www.jw.org/bn/"
+  },
+  {
+    "code": "bas",
+    "name": "Basaa",
+    "jwUrl": "https://www.jw.org/bas/"
+  },
+  {
+    "code": "ba",
+    "name": "Bashkir",
+    "jwUrl": "https://www.jw.org/ba/"
+  },
+  {
+    "code": "eu",
+    "name": "Basque",
+    "jwUrl": "https://www.jw.org/eu/"
+  },
+  {
+    "code": "bbc",
+    "name": "Batak Toba",
+    "jwUrl": "https://www.jw.org/bbc/"
+  },
+  {
+    "code": "bba",
+    "name": "bba",
+    "jwUrl": "https://www.jw.org/bba/"
+  },
+  {
+    "code": "bci",
+    "name": "bci",
+    "jwUrl": "https://www.jw.org/bci/"
+  },
+  {
+    "code": "be",
+    "name": "Belarusian",
+    "jwUrl": "https://www.jw.org/be/"
+  },
+  {
+    "code": "bem",
+    "name": "Bemba",
+    "jwUrl": "https://www.jw.org/bem/"
+  },
+  {
+    "code": "bfi",
+    "name": "bfi",
+    "jwUrl": "https://www.jw.org/bfi/"
+  },
+  {
+    "code": "bhw",
+    "name": "bhw",
+    "jwUrl": "https://www.jw.org/bhw/"
+  },
+  {
+    "code": "bcl",
+    "name": "Bikol",
+    "jwUrl": "https://www.jw.org/bcl/"
+  },
+  {
+    "code": "bin",
+    "name": "Bini",
+    "jwUrl": "https://www.jw.org/bin/"
+  },
+  {
+    "code": "bi",
+    "name": "Bislama",
+    "jwUrl": "https://www.jw.org/bi/"
+  },
+  {
+    "code": "bnn",
+    "name": "bnn",
+    "jwUrl": "https://www.jw.org/bnn/"
+  },
+  {
+    "code": "bqn",
+    "name": "bqn",
+    "jwUrl": "https://www.jw.org/bqn/"
+  },
+  {
+    "code": "bsq",
+    "name": "bsq",
+    "jwUrl": "https://www.jw.org/bsq/"
+  },
+  {
+    "code": "btg",
+    "name": "btg",
+    "jwUrl": "https://www.jw.org/btg/"
+  },
+  {
+    "code": "bts",
+    "name": "bts",
+    "jwUrl": "https://www.jw.org/bts/"
+  },
+  {
+    "code": "btx",
+    "name": "btx",
+    "jwUrl": "https://www.jw.org/btx/"
+  },
+  {
+    "code": "bg",
+    "name": "Bulgarian",
+    "jwUrl": "https://www.jw.org/bg/"
+  },
+  {
+    "code": "bum",
+    "name": "Bulu",
+    "jwUrl": "https://www.jw.org/bum/"
+  },
+  {
+    "code": "my",
+    "name": "Burmese",
+    "jwUrl": "https://www.jw.org/my/"
+  },
+  {
+    "code": "bvl",
+    "name": "bvl",
+    "jwUrl": "https://www.jw.org/bvl/"
+  },
+  {
+    "code": "bwb",
+    "name": "bwb",
+    "jwUrl": "https://www.jw.org/bwb/"
+  },
+  {
+    "code": "bzj",
+    "name": "bzj",
+    "jwUrl": "https://www.jw.org/bzj/"
+  },
+  {
+    "code": "ca-x-vlc",
+    "name": "ca-x-vlc",
+    "jwUrl": "https://www.jw.org/ca-x-vlc/"
+  },
+  {
+    "code": "cab",
+    "name": "cab",
+    "jwUrl": "https://www.jw.org/cab/"
+  },
+  {
+    "code": "cac",
+    "name": "cac",
+    "jwUrl": "https://www.jw.org/cac/"
+  },
+  {
+    "code": "cak",
+    "name": "cak",
+    "jwUrl": "https://www.jw.org/cak/"
+  },
+  {
+    "code": "cak-x-cqc",
+    "name": "cak-x-cqc",
+    "jwUrl": "https://www.jw.org/cak-x-cqc/"
+  },
+  {
+    "code": "yue-hans",
+    "name": "Cantonese (Simplified)",
+    "jwUrl": "https://www.jw.org/yue-hans/"
+  },
+  {
+    "code": "yue-hant",
+    "name": "Cantonese (Traditional)",
+    "jwUrl": "https://www.jw.org/yue-hant/"
+  },
+  {
+    "code": "caq",
+    "name": "caq",
+    "jwUrl": "https://www.jw.org/caq/"
+  },
+  {
+    "code": "car-x-crb",
+    "name": "car-x-crb",
+    "jwUrl": "https://www.jw.org/car-x-crb/"
+  },
+  {
+    "code": "car-x-tyw",
+    "name": "car-x-tyw",
+    "jwUrl": "https://www.jw.org/car-x-tyw/"
+  },
+  {
+    "code": "cat",
+    "name": "Catalan",
+    "jwUrl": "https://www.jw.org/cat/"
+  },
+  {
+    "code": "cbk",
+    "name": "cbk",
+    "jwUrl": "https://www.jw.org/cbk/"
+  },
+  {
+    "code": "cce",
+    "name": "cce",
+    "jwUrl": "https://www.jw.org/cce/"
+  },
+  {
+    "code": "ceb",
+    "name": "Cebuano",
+    "jwUrl": "https://www.jw.org/ceb/"
+  },
+  {
+    "code": "ckb",
+    "name": "Central Kurdish",
+    "jwUrl": "https://www.jw.org/ckb/"
+  },
+  {
+    "code": "chd",
+    "name": "chd",
+    "jwUrl": "https://www.jw.org/chd/"
+  },
+  {
+    "code": "cgg",
+    "name": "Chiga",
+    "jwUrl": "https://www.jw.org/cgg/"
+  },
+  {
+    "code": "qug",
+    "name": "Chimborazo Highland Quichua",
+    "jwUrl": "https://www.jw.org/qug/"
+  },
+  {
+    "code": "chj",
+    "name": "chj",
+    "jwUrl": "https://www.jw.org/chj/"
+  },
+  {
+    "code": "chk",
+    "name": "Chuukese",
+    "jwUrl": "https://www.jw.org/chk/"
+  },
+  {
+    "code": "cv",
+    "name": "Chuvash",
+    "jwUrl": "https://www.jw.org/cv/"
+  },
+  {
+    "code": "chw",
+    "name": "chw",
+    "jwUrl": "https://www.jw.org/chw/"
+  },
+  {
+    "code": "cjk",
+    "name": "cjk",
+    "jwUrl": "https://www.jw.org/cjk/"
+  },
+  {
+    "code": "cmi",
+    "name": "cmi",
+    "jwUrl": "https://www.jw.org/cmi/"
+  },
+  {
+    "code": "cmn-x-chk",
+    "name": "cmn-x-chk",
+    "jwUrl": "https://www.jw.org/cmn-x-chk/"
+  },
+  {
+    "code": "cnh",
+    "name": "cnh",
+    "jwUrl": "https://www.jw.org/cnh/"
+  },
+  {
+    "code": "cni",
+    "name": "cni",
+    "jwUrl": "https://www.jw.org/cni/"
+  },
+  {
+    "code": "swc",
+    "name": "Congo Swahili",
+    "jwUrl": "https://www.jw.org/swc/"
+  },
+  {
+    "code": "cri",
+    "name": "cri",
+    "jwUrl": "https://www.jw.org/cri/"
+  },
+  {
+    "code": "hr",
+    "name": "Croatian",
+    "jwUrl": "https://www.jw.org/hr/"
+  },
+  {
+    "code": "cse",
+    "name": "cse",
+    "jwUrl": "https://www.jw.org/cse/"
+  },
+  {
+    "code": "csf",
+    "name": "csf",
+    "jwUrl": "https://www.jw.org/csf/"
+  },
+  {
+    "code": "csg",
+    "name": "csg",
+    "jwUrl": "https://www.jw.org/csg/"
+  },
+  {
+    "code": "csn",
+    "name": "csn",
+    "jwUrl": "https://www.jw.org/csn/"
+  },
+  {
+    "code": "csq",
+    "name": "csq",
+    "jwUrl": "https://www.jw.org/csq/"
+  },
+  {
+    "code": "csr",
+    "name": "csr",
+    "jwUrl": "https://www.jw.org/csr/"
+  },
+  {
+    "code": "ctd",
+    "name": "ctd",
+    "jwUrl": "https://www.jw.org/ctd/"
+  },
+  {
+    "code": "cto",
+    "name": "cto",
+    "jwUrl": "https://www.jw.org/cto/"
+  },
+  {
+    "code": "ctu",
+    "name": "ctu",
+    "jwUrl": "https://www.jw.org/ctu/"
+  },
+  {
+    "code": "cuk",
+    "name": "cuk",
+    "jwUrl": "https://www.jw.org/cuk/"
+  },
+  {
+    "code": "cs",
+    "name": "Czech",
+    "jwUrl": "https://www.jw.org/cs/"
+  },
+  {
+    "code": "da",
+    "name": "Danish",
+    "jwUrl": "https://www.jw.org/da/"
+  },
+  {
+    "code": "prs",
+    "name": "Dari",
+    "jwUrl": "https://www.jw.org/prs/"
+  },
+  {
+    "code": "dga",
+    "name": "dga",
+    "jwUrl": "https://www.jw.org/dga/"
+  },
+  {
+    "code": "dhv",
+    "name": "dhv",
+    "jwUrl": "https://www.jw.org/dhv/"
+  },
+  {
+    "code": "din",
+    "name": "Dinka",
+    "jwUrl": "https://www.jw.org/din/"
+  },
+  {
+    "code": "diu",
+    "name": "diu",
+    "jwUrl": "https://www.jw.org/diu/"
+  },
+  {
+    "code": "djk",
+    "name": "djk",
+    "jwUrl": "https://www.jw.org/djk/"
+  },
+  {
+    "code": "daf",
+    "name": "dnj",
+    "jwUrl": "https://www.jw.org/daf/"
+  },
+  {
+    "code": "dsl",
+    "name": "dsl",
+    "jwUrl": "https://www.jw.org/dsl/"
+  },
+  {
+    "code": "dua",
+    "name": "Duala",
+    "jwUrl": "https://www.jw.org/dua/"
+  },
+  {
+    "code": "nl",
+    "name": "Dutch",
+    "jwUrl": "https://www.jw.org/nl/"
+  },
+  {
+    "code": "dyu",
+    "name": "Dyula",
+    "jwUrl": "https://www.jw.org/dyu/"
+  },
+  {
+    "code": "ecs",
+    "name": "ecs",
+    "jwUrl": "https://www.jw.org/ecs/"
+  },
+  {
+    "code": "efi",
+    "name": "Efik",
+    "jwUrl": "https://www.jw.org/efi/"
+  },
+  {
+    "code": "arz",
+    "name": "Egyptian Arabic",
+    "jwUrl": "https://www.jw.org/arz/"
+  },
+  {
+    "code": "emp",
+    "name": "emp",
+    "jwUrl": "https://www.jw.org/emp/"
+  },
+  {
+    "code": "en",
+    "name": "English",
+    "jwUrl": "https://www.jw.org/en/"
+  },
+  {
+    "code": "erk",
+    "name": "erk",
+    "jwUrl": "https://www.jw.org/erk/"
+  },
+  {
+    "code": "esn",
+    "name": "esn",
+    "jwUrl": "https://www.jw.org/esn/"
+  },
+  {
+    "code": "et",
+    "name": "Estonian",
+    "jwUrl": "https://www.jw.org/et/"
+  },
+  {
+    "code": "eth",
+    "name": "eth",
+    "jwUrl": "https://www.jw.org/eth/"
+  },
+  {
+    "code": "pt-pt",
+    "name": "European Portuguese",
+    "jwUrl": "https://www.jw.org/pt-pt/"
+  },
+  {
+    "code": "ee",
+    "name": "Ewe",
+    "jwUrl": "https://www.jw.org/ee/"
+  },
+  {
+    "code": "ewo",
+    "name": "Ewondo",
+    "jwUrl": "https://www.jw.org/ewo/"
+  },
+  {
+    "code": "fan",
+    "name": "Fang",
+    "jwUrl": "https://www.jw.org/fan/"
+  },
+  {
+    "code": "fo",
+    "name": "Faroese",
+    "jwUrl": "https://www.jw.org/fo/"
+  },
+  {
+    "code": "fcs",
+    "name": "fcs",
+    "jwUrl": "https://www.jw.org/fcs/"
+  },
+  {
+    "code": "fij-x-fnr",
+    "name": "fij-x-fnr",
+    "jwUrl": "https://www.jw.org/fij-x-fnr/"
+  },
+  {
+    "code": "fij-x-kdv",
+    "name": "fij-x-kdv",
+    "jwUrl": "https://www.jw.org/fij-x-kdv/"
+  },
+  {
+    "code": "fij-x-mct",
+    "name": "fij-x-mct",
+    "jwUrl": "https://www.jw.org/fij-x-mct/"
+  },
+  {
+    "code": "fij-x-ndi",
+    "name": "fij-x-ndi",
+    "jwUrl": "https://www.jw.org/fij-x-ndi/"
+  },
+  {
+    "code": "hif",
+    "name": "Fiji Hindi",
+    "jwUrl": "https://www.jw.org/hif/"
+  },
+  {
+    "code": "fj",
+    "name": "Fijian",
+    "jwUrl": "https://www.jw.org/fj/"
+  },
+  {
+    "code": "tl",
+    "name": "Filipino",
+    "jwUrl": "https://www.jw.org/tl/"
+  },
+  {
+    "code": "fi",
+    "name": "Finnish",
+    "jwUrl": "https://www.jw.org/fi/"
+  },
+  {
+    "code": "fon",
+    "name": "Fon",
+    "jwUrl": "https://www.jw.org/fon/"
+  },
+  {
+    "code": "gur",
+    "name": "Frafra",
+    "jwUrl": "https://www.jw.org/gur/"
+  },
+  {
+    "code": "fr",
+    "name": "French",
+    "jwUrl": "https://www.jw.org/fr/"
+  },
+  {
+    "code": "fse",
+    "name": "fse",
+    "jwUrl": "https://www.jw.org/fse/"
+  },
+  {
+    "code": "fud",
+    "name": "fud",
+    "jwUrl": "https://www.jw.org/fud/"
+  },
+  {
+    "code": "fuf",
+    "name": "fuf",
+    "jwUrl": "https://www.jw.org/fuf/"
+  },
+  {
+    "code": "gaa",
+    "name": "Ga",
+    "jwUrl": "https://www.jw.org/gaa/"
+  },
+  {
+    "code": "gl",
+    "name": "Galician",
+    "jwUrl": "https://www.jw.org/gl/"
+  },
+  {
+    "code": "lg",
+    "name": "Ganda",
+    "jwUrl": "https://www.jw.org/lg/"
+  },
+  {
+    "code": "gba",
+    "name": "Gbaya",
+    "jwUrl": "https://www.jw.org/gba/"
+  },
+  {
+    "code": "gcf",
+    "name": "gcf",
+    "jwUrl": "https://www.jw.org/gcf/"
+  },
+  {
+    "code": "gcf-x-mtc",
+    "name": "gcf-x-mtc",
+    "jwUrl": "https://www.jw.org/gcf-x-mtc/"
+  },
+  {
+    "code": "gcr",
+    "name": "gcr",
+    "jwUrl": "https://www.jw.org/gcr/"
+  },
+  {
+    "code": "ka",
+    "name": "Georgian",
+    "jwUrl": "https://www.jw.org/ka/"
+  },
+  {
+    "code": "de",
+    "name": "German",
+    "jwUrl": "https://www.jw.org/de/"
+  },
+  {
+    "code": "bbj",
+    "name": "Ghomala",
+    "jwUrl": "https://www.jw.org/bbj/"
+  },
+  {
+    "code": "gil",
+    "name": "Gilbertese",
+    "jwUrl": "https://www.jw.org/gil/"
+  },
+  {
+    "code": "gkn",
+    "name": "gkn",
+    "jwUrl": "https://www.jw.org/gkn/"
+  },
+  {
+    "code": "gkp",
+    "name": "gkp",
+    "jwUrl": "https://www.jw.org/gkp/"
+  },
+  {
+    "code": "el",
+    "name": "Greek",
+    "jwUrl": "https://www.jw.org/el/"
+  },
+  {
+    "code": "gse",
+    "name": "gse",
+    "jwUrl": "https://www.jw.org/gse/"
+  },
+  {
+    "code": "gsg",
+    "name": "gsg",
+    "jwUrl": "https://www.jw.org/gsg/"
+  },
+  {
+    "code": "gsm",
+    "name": "gsm",
+    "jwUrl": "https://www.jw.org/gsm/"
+  },
+  {
+    "code": "gug",
+    "name": "Guarani",
+    "jwUrl": "https://www.jw.org/gug/"
+  },
+  {
+    "code": "gui",
+    "name": "gui",
+    "jwUrl": "https://www.jw.org/gui/"
+  },
+  {
+    "code": "gu",
+    "name": "Gujarati",
+    "jwUrl": "https://www.jw.org/gu/"
+  },
+  {
+    "code": "gu-latn",
+    "name": "Gujarati (Latin)",
+    "jwUrl": "https://www.jw.org/gu-latn/"
+  },
+  {
+    "code": "gum",
+    "name": "gum",
+    "jwUrl": "https://www.jw.org/gum/"
+  },
+  {
+    "code": "guw",
+    "name": "guw",
+    "jwUrl": "https://www.jw.org/guw/"
+  },
+  {
+    "code": "guw-bj",
+    "name": "guw (Benin)",
+    "jwUrl": "https://www.jw.org/guw-bj/"
+  },
+  {
+    "code": "gux",
+    "name": "gux",
+    "jwUrl": "https://www.jw.org/gux/"
+  },
+  {
+    "code": "gxx",
+    "name": "gxx",
+    "jwUrl": "https://www.jw.org/gxx/"
+  },
+  {
+    "code": "gym",
+    "name": "gym",
+    "jwUrl": "https://www.jw.org/gym/"
+  },
+  {
+    "code": "hab",
+    "name": "hab",
+    "jwUrl": "https://www.jw.org/hab/"
+  },
+  {
+    "code": "ht",
+    "name": "Haitian Creole",
+    "jwUrl": "https://www.jw.org/ht/"
+  },
+  {
+    "code": "ha",
+    "name": "Hausa",
+    "jwUrl": "https://www.jw.org/ha/"
+  },
+  {
+    "code": "hav",
+    "name": "hav",
+    "jwUrl": "https://www.jw.org/hav/"
+  },
+  {
+    "code": "haw",
+    "name": "Hawaiian",
+    "jwUrl": "https://www.jw.org/haw/"
+  },
+  {
+    "code": "hay",
+    "name": "hay",
+    "jwUrl": "https://www.jw.org/hay/"
+  },
+  {
+    "code": "hch",
+    "name": "hch",
+    "jwUrl": "https://www.jw.org/hch/"
+  },
+  {
+    "code": "hds",
+    "name": "hds",
+    "jwUrl": "https://www.jw.org/hds/"
+  },
+  {
+    "code": "he",
+    "name": "Hebrew",
+    "jwUrl": "https://www.jw.org/he/"
+  },
+  {
+    "code": "hz",
+    "name": "Herero",
+    "jwUrl": "https://www.jw.org/hz/"
+  },
+  {
+    "code": "hil",
+    "name": "Hiligaynon",
+    "jwUrl": "https://www.jw.org/hil/"
+  },
+  {
+    "code": "hi",
+    "name": "Hindi",
+    "jwUrl": "https://www.jw.org/hi/"
+  },
+  {
+    "code": "hi-latn",
+    "name": "Hindi (Latin)",
+    "jwUrl": "https://www.jw.org/hi-latn/"
+  },
+  {
+    "code": "ho",
+    "name": "Hiri Motu",
+    "jwUrl": "https://www.jw.org/ho/"
+  },
+  {
+    "code": "hmn",
+    "name": "Hmong",
+    "jwUrl": "https://www.jw.org/hmn/"
+  },
+  {
+    "code": "hrx",
+    "name": "hrx",
+    "jwUrl": "https://www.jw.org/hrx/"
+  },
+  {
+    "code": "hu",
+    "name": "Hungarian",
+    "jwUrl": "https://www.jw.org/hu/"
+  },
+  {
+    "code": "hus",
+    "name": "hus",
+    "jwUrl": "https://www.jw.org/hus/"
+  },
+  {
+    "code": "hwc",
+    "name": "hwc",
+    "jwUrl": "https://www.jw.org/hwc/"
+  },
+  {
+    "code": "hyw",
+    "name": "hyw",
+    "jwUrl": "https://www.jw.org/hyw/"
+  },
+  {
+    "code": "hyw-x-hma",
+    "name": "hyw-x-hma",
+    "jwUrl": "https://www.jw.org/hyw-x-hma/"
+  },
+  {
+    "code": "hyw-x-hms",
+    "name": "hyw-x-hms",
+    "jwUrl": "https://www.jw.org/hyw-x-hms/"
+  },
+  {
+    "code": "iba",
+    "name": "Iban",
+    "jwUrl": "https://www.jw.org/iba/"
+  },
+  {
+    "code": "ibg",
+    "name": "ibg",
+    "jwUrl": "https://www.jw.org/ibg/"
+  },
+  {
+    "code": "is",
+    "name": "Icelandic",
+    "jwUrl": "https://www.jw.org/is/"
+  },
+  {
+    "code": "icr",
+    "name": "icr",
+    "jwUrl": "https://www.jw.org/icr/"
+  },
+  {
+    "code": "idu",
+    "name": "idu",
+    "jwUrl": "https://www.jw.org/idu/"
+  },
+  {
+    "code": "igb",
+    "name": "igb",
+    "jwUrl": "https://www.jw.org/igb/"
+  },
+  {
+    "code": "ig",
+    "name": "Igbo",
+    "jwUrl": "https://www.jw.org/ig/"
+  },
+  {
+    "code": "ige",
+    "name": "ige",
+    "jwUrl": "https://www.jw.org/ige/"
+  },
+  {
+    "code": "igl",
+    "name": "igl",
+    "jwUrl": "https://www.jw.org/igl/"
+  },
+  {
+    "code": "ijc",
+    "name": "ijc",
+    "jwUrl": "https://www.jw.org/ijc/"
+  },
+  {
+    "code": "ilo",
+    "name": "Iloko",
+    "jwUrl": "https://www.jw.org/ilo/"
+  },
+  {
+    "code": "id",
+    "name": "Indonesian",
+    "jwUrl": "https://www.jw.org/id/"
+  },
+  {
+    "code": "inl",
+    "name": "inl",
+    "jwUrl": "https://www.jw.org/inl/"
+  },
+  {
+    "code": "ins",
+    "name": "ins",
+    "jwUrl": "https://www.jw.org/ins/"
+  },
+  {
+    "code": "ga",
+    "name": "Irish",
+    "jwUrl": "https://www.jw.org/ga/"
+  },
+  {
+    "code": "ise",
+    "name": "ise",
+    "jwUrl": "https://www.jw.org/ise/"
+  },
+  {
+    "code": "isg",
+    "name": "isg",
+    "jwUrl": "https://www.jw.org/isg/"
+  },
+  {
+    "code": "ish",
+    "name": "ish",
+    "jwUrl": "https://www.jw.org/ish/"
+  },
+  {
+    "code": "iso",
+    "name": "iso",
+    "jwUrl": "https://www.jw.org/iso/"
+  },
+  {
+    "code": "isr",
+    "name": "isr",
+    "jwUrl": "https://www.jw.org/isr/"
+  },
+  {
+    "code": "it",
+    "name": "Italian",
+    "jwUrl": "https://www.jw.org/it/"
+  },
+  {
+    "code": "its",
+    "name": "its",
+    "jwUrl": "https://www.jw.org/its/"
+  },
+  {
+    "code": "jac-x-jc",
+    "name": "jac-x-jc",
+    "jwUrl": "https://www.jw.org/jac-x-jc/"
+  },
+  {
+    "code": "jam-x-jcr",
+    "name": "jam-x-jcr",
+    "jwUrl": "https://www.jw.org/jam-x-jcr/"
+  },
+  {
+    "code": "ja",
+    "name": "Japanese",
+    "jwUrl": "https://www.jw.org/ja/"
+  },
+  {
+    "code": "jv",
+    "name": "Javanese",
+    "jwUrl": "https://www.jw.org/jv/"
+  },
+  {
+    "code": "jiv",
+    "name": "jiv",
+    "jwUrl": "https://www.jw.org/jiv/"
+  },
+  {
+    "code": "jls",
+    "name": "jls",
+    "jwUrl": "https://www.jw.org/jls/"
+  },
+  {
+    "code": "jmx",
+    "name": "jmx",
+    "jwUrl": "https://www.jw.org/jmx/"
+  },
+  {
+    "code": "jsl",
+    "name": "jsl",
+    "jwUrl": "https://www.jw.org/jsl/"
+  },
+  {
+    "code": "kbd",
+    "name": "Kabardian",
+    "jwUrl": "https://www.jw.org/kbd/"
+  },
+  {
+    "code": "kea",
+    "name": "Kabuverdianu",
+    "jwUrl": "https://www.jw.org/kea/"
+  },
+  {
+    "code": "kab",
+    "name": "Kabyle",
+    "jwUrl": "https://www.jw.org/kab/"
+  },
+  {
+    "code": "kac",
+    "name": "Kachin",
+    "jwUrl": "https://www.jw.org/kac/"
+  },
+  {
+    "code": "kgp",
+    "name": "Kaingang",
+    "jwUrl": "https://www.jw.org/kgp/"
+  },
+  {
+    "code": "kl",
+    "name": "Kalaallisut",
+    "jwUrl": "https://www.jw.org/kl/"
+  },
+  {
+    "code": "kam",
+    "name": "Kamba",
+    "jwUrl": "https://www.jw.org/kam/"
+  },
+  {
+    "code": "kn",
+    "name": "Kannada",
+    "jwUrl": "https://www.jw.org/kn/"
+  },
+  {
+    "code": "kqn",
+    "name": "Kaonde",
+    "jwUrl": "https://www.jw.org/kqn/"
+  },
+  {
+    "code": "kk",
+    "name": "Kazakh",
+    "jwUrl": "https://www.jw.org/kk/"
+  },
+  {
+    "code": "kk-arab",
+    "name": "Kazakh (Arabic)",
+    "jwUrl": "https://www.jw.org/kk-arab/"
+  },
+  {
+    "code": "kbp",
+    "name": "kbp",
+    "jwUrl": "https://www.jw.org/kbp/"
+  },
+  {
+    "code": "kck-x-kl",
+    "name": "kck-x-kl",
+    "jwUrl": "https://www.jw.org/kck-x-kl/"
+  },
+  {
+    "code": "kdn",
+    "name": "kdn",
+    "jwUrl": "https://www.jw.org/kdn/"
+  },
+  {
+    "code": "kek",
+    "name": "kek",
+    "jwUrl": "https://www.jw.org/kek/"
+  },
+  {
+    "code": "kgk",
+    "name": "kgk",
+    "jwUrl": "https://www.jw.org/kgk/"
+  },
+  {
+    "code": "kha",
+    "name": "Khasi",
+    "jwUrl": "https://www.jw.org/kha/"
+  },
+  {
+    "code": "km",
+    "name": "Khmer",
+    "jwUrl": "https://www.jw.org/km/"
+  },
+  {
+    "code": "ki",
+    "name": "Kikuyu",
+    "jwUrl": "https://www.jw.org/ki/"
+  },
+  {
+    "code": "kmb",
+    "name": "Kimbundu",
+    "jwUrl": "https://www.jw.org/kmb/"
+  },
+  {
+    "code": "rw",
+    "name": "Kinyarwanda",
+    "jwUrl": "https://www.jw.org/rw/"
+  },
+  {
+    "code": "kjh",
+    "name": "kjh",
+    "jwUrl": "https://www.jw.org/kjh/"
+  },
+  {
+    "code": "kmr-x-rd",
+    "name": "kmr-x-rd",
+    "jwUrl": "https://www.jw.org/kmr-x-rd/"
+  },
+  {
+    "code": "kmr-x-rdu",
+    "name": "kmr-x-rdu",
+    "jwUrl": "https://www.jw.org/kmr-x-rdu/"
+  },
+  {
+    "code": "kny",
+    "name": "kny",
+    "jwUrl": "https://www.jw.org/kny/"
+  },
+  {
+    "code": "kg",
+    "name": "Kongo",
+    "jwUrl": "https://www.jw.org/kg/"
+  },
+  {
+    "code": "gom",
+    "name": "Konkani",
+    "jwUrl": "https://www.jw.org/gom/"
+  },
+  {
+    "code": "koo",
+    "name": "koo",
+    "jwUrl": "https://www.jw.org/koo/"
+  },
+  {
+    "code": "ko",
+    "name": "Korean",
+    "jwUrl": "https://www.jw.org/ko/"
+  },
+  {
+    "code": "kos",
+    "name": "Kosraean",
+    "jwUrl": "https://www.jw.org/kos/"
+  },
+  {
+    "code": "xpe",
+    "name": "Kpelle",
+    "jwUrl": "https://www.jw.org/xpe/"
+  },
+  {
+    "code": "kri",
+    "name": "Krio",
+    "jwUrl": "https://www.jw.org/kri/"
+  },
+  {
+    "code": "kss",
+    "name": "kss",
+    "jwUrl": "https://www.jw.org/kss/"
+  },
+  {
+    "code": "ksw",
+    "name": "ksw",
+    "jwUrl": "https://www.jw.org/ksw/"
+  },
+  {
+    "code": "ktu-x-kgl",
+    "name": "ktu-x-kgl",
+    "jwUrl": "https://www.jw.org/ktu-x-kgl/"
+  },
+  {
+    "code": "ktu-x-kit",
+    "name": "ktu-x-kit",
+    "jwUrl": "https://www.jw.org/ktu-x-kit/"
+  },
+  {
+    "code": "kj",
+    "name": "Kuanyama",
+    "jwUrl": "https://www.jw.org/kj/"
+  },
+  {
+    "code": "kmr-cyrl",
+    "name": "Kurdish (Cyrillic)",
+    "jwUrl": "https://www.jw.org/kmr-cyrl/"
+  },
+  {
+    "code": "kvk",
+    "name": "kvk",
+    "jwUrl": "https://www.jw.org/kvk/"
+  },
+  {
+    "code": "kwf",
+    "name": "kwf",
+    "jwUrl": "https://www.jw.org/kwf/"
+  },
+  {
+    "code": "kwn",
+    "name": "kwn",
+    "jwUrl": "https://www.jw.org/kwn/"
+  },
+  {
+    "code": "kwy",
+    "name": "kwy",
+    "jwUrl": "https://www.jw.org/kwy/"
+  },
+  {
+    "code": "ky",
+    "name": "Kyrgyz",
+    "jwUrl": "https://www.jw.org/ky/"
+  },
+  {
+    "code": "kzn",
+    "name": "kzn",
+    "jwUrl": "https://www.jw.org/kzn/"
+  },
+  {
+    "code": "quc",
+    "name": "Kʼicheʼ",
+    "jwUrl": "https://www.jw.org/quc/"
+  },
+  {
+    "code": "lai",
+    "name": "lai",
+    "jwUrl": "https://www.jw.org/lai/"
+  },
+  {
+    "code": "laj",
+    "name": "laj",
+    "jwUrl": "https://www.jw.org/laj/"
+  },
+  {
+    "code": "lam",
+    "name": "Lamba",
+    "jwUrl": "https://www.jw.org/lam/"
+  },
+  {
+    "code": "lo",
+    "name": "Lao",
+    "jwUrl": "https://www.jw.org/lo/"
+  },
+  {
+    "code": "lv",
+    "name": "Latvian",
+    "jwUrl": "https://www.jw.org/lv/"
+  },
+  {
+    "code": "ldi",
+    "name": "ldi",
+    "jwUrl": "https://www.jw.org/ldi/"
+  },
+  {
+    "code": "lea",
+    "name": "lea",
+    "jwUrl": "https://www.jw.org/lea/"
+  },
+  {
+    "code": "led",
+    "name": "led",
+    "jwUrl": "https://www.jw.org/led/"
+  },
+  {
+    "code": "leh",
+    "name": "leh",
+    "jwUrl": "https://www.jw.org/leh/"
+  },
+  {
+    "code": "lgg",
+    "name": "lgg",
+    "jwUrl": "https://www.jw.org/lgg/"
+  },
+  {
+    "code": "lhu",
+    "name": "lhu",
+    "jwUrl": "https://www.jw.org/lhu/"
+  },
+  {
+    "code": "ln",
+    "name": "Lingala",
+    "jwUrl": "https://www.jw.org/ln/"
+  },
+  {
+    "code": "lir",
+    "name": "lir",
+    "jwUrl": "https://www.jw.org/lir/"
+  },
+  {
+    "code": "lt",
+    "name": "Lithuanian",
+    "jwUrl": "https://www.jw.org/lt/"
+  },
+  {
+    "code": "llb",
+    "name": "llb",
+    "jwUrl": "https://www.jw.org/llb/"
+  },
+  {
+    "code": "lld-x-lad",
+    "name": "lld-x-lad",
+    "jwUrl": "https://www.jw.org/lld-x-lad/"
+  },
+  {
+    "code": "llp",
+    "name": "llp",
+    "jwUrl": "https://www.jw.org/llp/"
+  },
+  {
+    "code": "lls",
+    "name": "lls",
+    "jwUrl": "https://www.jw.org/lls/"
+  },
+  {
+    "code": "llx",
+    "name": "llx",
+    "jwUrl": "https://www.jw.org/llx/"
+  },
+  {
+    "code": "lml",
+    "name": "lml",
+    "jwUrl": "https://www.jw.org/lml/"
+  },
+  {
+    "code": "lom",
+    "name": "lom",
+    "jwUrl": "https://www.jw.org/lom/"
+  },
+  {
+    "code": "nds",
+    "name": "Low German",
+    "jwUrl": "https://www.jw.org/nds/"
+  },
+  {
+    "code": "loz",
+    "name": "Lozi",
+    "jwUrl": "https://www.jw.org/loz/"
+  },
+  {
+    "code": "lsl",
+    "name": "lsl",
+    "jwUrl": "https://www.jw.org/lsl/"
+  },
+  {
+    "code": "lsp",
+    "name": "lsp",
+    "jwUrl": "https://www.jw.org/lsp/"
+  },
+  {
+    "code": "lu",
+    "name": "Luba-Katanga",
+    "jwUrl": "https://www.jw.org/lu/"
+  },
+  {
+    "code": "lua",
+    "name": "Luba-Lulua",
+    "jwUrl": "https://www.jw.org/lua/"
+  },
+  {
+    "code": "lue",
+    "name": "lue",
+    "jwUrl": "https://www.jw.org/lue/"
+  },
+  {
+    "code": "lun",
+    "name": "Lunda",
+    "jwUrl": "https://www.jw.org/lun/"
+  },
+  {
+    "code": "luo",
+    "name": "Luo",
+    "jwUrl": "https://www.jw.org/luo/"
+  },
+  {
+    "code": "lb",
+    "name": "Luxembourgish",
+    "jwUrl": "https://www.jw.org/lb/"
+  },
+  {
+    "code": "mk",
+    "name": "Macedonian",
+    "jwUrl": "https://www.jw.org/mk/"
+  },
+  {
+    "code": "vmw",
+    "name": "Makhuwa",
+    "jwUrl": "https://www.jw.org/vmw/"
+  },
+  {
+    "code": "mgh",
+    "name": "Makhuwa-Meetto",
+    "jwUrl": "https://www.jw.org/mgh/"
+  },
+  {
+    "code": "kde",
+    "name": "Makonde",
+    "jwUrl": "https://www.jw.org/kde/"
+  },
+  {
+    "code": "mg",
+    "name": "Malagasy",
+    "jwUrl": "https://www.jw.org/mg/"
+  },
+  {
+    "code": "ms",
+    "name": "Malay",
+    "jwUrl": "https://www.jw.org/ms/"
+  },
+  {
+    "code": "ml",
+    "name": "Malayalam",
+    "jwUrl": "https://www.jw.org/ml/"
+  },
+  {
+    "code": "mt",
+    "name": "Maltese",
+    "jwUrl": "https://www.jw.org/mt/"
+  },
+  {
+    "code": "mam",
+    "name": "mam",
+    "jwUrl": "https://www.jw.org/mam/"
+  },
+  {
+    "code": "mni",
+    "name": "Manipuri",
+    "jwUrl": "https://www.jw.org/mni/"
+  },
+  {
+    "code": "mni-latn",
+    "name": "Manipuri (Latin)",
+    "jwUrl": "https://www.jw.org/mni-latn/"
+  },
+  {
+    "code": "mi",
+    "name": "Māori",
+    "jwUrl": "https://www.jw.org/mi/"
+  },
+  {
+    "code": "arn",
+    "name": "Mapuche",
+    "jwUrl": "https://www.jw.org/arn/"
+  },
+  {
+    "code": "mr",
+    "name": "Marathi",
+    "jwUrl": "https://www.jw.org/mr/"
+  },
+  {
+    "code": "mhr",
+    "name": "Mari",
+    "jwUrl": "https://www.jw.org/mhr/"
+  },
+  {
+    "code": "mh",
+    "name": "Marshallese",
+    "jwUrl": "https://www.jw.org/mh/"
+  },
+  {
+    "code": "mau",
+    "name": "mau",
+    "jwUrl": "https://www.jw.org/mau/"
+  },
+  {
+    "code": "mav",
+    "name": "mav",
+    "jwUrl": "https://www.jw.org/mav/"
+  },
+  {
+    "code": "maz",
+    "name": "maz",
+    "jwUrl": "https://www.jw.org/maz/"
+  },
+  {
+    "code": "mbc",
+    "name": "mbc",
+    "jwUrl": "https://www.jw.org/mbc/"
+  },
+  {
+    "code": "mbp",
+    "name": "mbp",
+    "jwUrl": "https://www.jw.org/mbp/"
+  },
+  {
+    "code": "mcf",
+    "name": "mcf",
+    "jwUrl": "https://www.jw.org/mcf/"
+  },
+  {
+    "code": "mck",
+    "name": "mck",
+    "jwUrl": "https://www.jw.org/mck/"
+  },
+  {
+    "code": "mco",
+    "name": "mco",
+    "jwUrl": "https://www.jw.org/mco/"
+  },
+  {
+    "code": "mcp",
+    "name": "mcp",
+    "jwUrl": "https://www.jw.org/mcp/"
+  },
+  {
+    "code": "byv",
+    "name": "Medumba",
+    "jwUrl": "https://www.jw.org/byv/"
+  },
+  {
+    "code": "meh",
+    "name": "meh",
+    "jwUrl": "https://www.jw.org/meh/"
+  },
+  {
+    "code": "mer",
+    "name": "Meru",
+    "jwUrl": "https://www.jw.org/mer/"
+  },
+  {
+    "code": "meu",
+    "name": "meu",
+    "jwUrl": "https://www.jw.org/meu/"
+  },
+  {
+    "code": "mev",
+    "name": "mev",
+    "jwUrl": "https://www.jw.org/mev/"
+  },
+  {
+    "code": "mfq",
+    "name": "mfq",
+    "jwUrl": "https://www.jw.org/mfq/"
+  },
+  {
+    "code": "mfy",
+    "name": "mfy",
+    "jwUrl": "https://www.jw.org/mfy/"
+  },
+  {
+    "code": "mgr",
+    "name": "mgr",
+    "jwUrl": "https://www.jw.org/mgr/"
+  },
+  {
+    "code": "mgv",
+    "name": "mgv",
+    "jwUrl": "https://www.jw.org/mgv/"
+  },
+  {
+    "code": "mhm",
+    "name": "mhm",
+    "jwUrl": "https://www.jw.org/mhm/"
+  },
+  {
+    "code": "xmf",
+    "name": "Mingrelian",
+    "jwUrl": "https://www.jw.org/xmf/"
+  },
+  {
+    "code": "miq",
+    "name": "miq",
+    "jwUrl": "https://www.jw.org/miq/"
+  },
+  {
+    "code": "lus",
+    "name": "Mizo",
+    "jwUrl": "https://www.jw.org/lus/"
+  },
+  {
+    "code": "mlu",
+    "name": "mlu",
+    "jwUrl": "https://www.jw.org/mlu/"
+  },
+  {
+    "code": "mny",
+    "name": "mny",
+    "jwUrl": "https://www.jw.org/mny/"
+  },
+  {
+    "code": "mn",
+    "name": "Mongolian",
+    "jwUrl": "https://www.jw.org/mn/"
+  },
+  {
+    "code": "mop",
+    "name": "mop",
+    "jwUrl": "https://www.jw.org/mop/"
+  },
+  {
+    "code": "mfe",
+    "name": "Morisyen",
+    "jwUrl": "https://www.jw.org/mfe/"
+  },
+  {
+    "code": "mos",
+    "name": "Mossi",
+    "jwUrl": "https://www.jw.org/mos/"
+  },
+  {
+    "code": "mwn",
+    "name": "mwn",
+    "jwUrl": "https://www.jw.org/mwn/"
+  },
+  {
+    "code": "mxv",
+    "name": "mxv",
+    "jwUrl": "https://www.jw.org/mxv/"
+  },
+  {
+    "code": "mzc",
+    "name": "mzc",
+    "jwUrl": "https://www.jw.org/mzc/"
+  },
+  {
+    "code": "mzh",
+    "name": "mzh",
+    "jwUrl": "https://www.jw.org/mzh/"
+  },
+  {
+    "code": "mzy",
+    "name": "mzy",
+    "jwUrl": "https://www.jw.org/mzy/"
+  },
+  {
+    "code": "nan-x-chw",
+    "name": "nan-x-chw",
+    "jwUrl": "https://www.jw.org/nan-x-chw/"
+  },
+  {
+    "code": "naq-x-dmr",
+    "name": "naq-x-dmr",
+    "jwUrl": "https://www.jw.org/naq-x-dmr/"
+  },
+  {
+    "code": "nv",
+    "name": "Navajo",
+    "jwUrl": "https://www.jw.org/nv/"
+  },
+  {
+    "code": "nba",
+    "name": "nba",
+    "jwUrl": "https://www.jw.org/nba/"
+  },
+  {
+    "code": "nbs",
+    "name": "nbs",
+    "jwUrl": "https://www.jw.org/nbs/"
+  },
+  {
+    "code": "nch",
+    "name": "nch",
+    "jwUrl": "https://www.jw.org/nch/"
+  },
+  {
+    "code": "ncj",
+    "name": "ncj",
+    "jwUrl": "https://www.jw.org/ncj/"
+  },
+  {
+    "code": "ncs",
+    "name": "ncs",
+    "jwUrl": "https://www.jw.org/ncs/"
+  },
+  {
+    "code": "ncx",
+    "name": "ncx",
+    "jwUrl": "https://www.jw.org/ncx/"
+  },
+  {
+    "code": "ndc",
+    "name": "ndc",
+    "jwUrl": "https://www.jw.org/ndc/"
+  },
+  {
+    "code": "ndc-x-ndw",
+    "name": "ndc-x-ndw",
+    "jwUrl": "https://www.jw.org/ndc-x-ndw/"
+  },
+  {
+    "code": "ng",
+    "name": "Ndonga",
+    "jwUrl": "https://www.jw.org/ng/"
+  },
+  {
+    "code": "nen",
+    "name": "nen",
+    "jwUrl": "https://www.jw.org/nen/"
+  },
+  {
+    "code": "ne",
+    "name": "Nepali",
+    "jwUrl": "https://www.jw.org/ne/"
+  },
+  {
+    "code": "ngb",
+    "name": "ngb",
+    "jwUrl": "https://www.jw.org/ngb/"
+  },
+  {
+    "code": "nnh",
+    "name": "Ngiemboon",
+    "jwUrl": "https://www.jw.org/nnh/"
+  },
+  {
+    "code": "ngl",
+    "name": "ngl",
+    "jwUrl": "https://www.jw.org/ngl/"
+  },
+  {
+    "code": "ngu",
+    "name": "ngu",
+    "jwUrl": "https://www.jw.org/ngu/"
+  },
+  {
+    "code": "yrl",
+    "name": "Nheengatu",
+    "jwUrl": "https://www.jw.org/yrl/"
+  },
+  {
+    "code": "nhk",
+    "name": "nhk",
+    "jwUrl": "https://www.jw.org/nhk/"
+  },
+  {
+    "code": "nia",
+    "name": "Nias",
+    "jwUrl": "https://www.jw.org/nia/"
+  },
+  {
+    "code": "niu",
+    "name": "Niuean",
+    "jwUrl": "https://www.jw.org/niu/"
+  },
+  {
+    "code": "nmk",
+    "name": "nmk",
+    "jwUrl": "https://www.jw.org/nmk/"
+  },
+  {
+    "code": "nmq",
+    "name": "nmq",
+    "jwUrl": "https://www.jw.org/nmq/"
+  },
+  {
+    "code": "nnb",
+    "name": "nnb",
+    "jwUrl": "https://www.jw.org/nnb/"
+  },
+  {
+    "code": "nd",
+    "name": "North Ndebele",
+    "jwUrl": "https://www.jw.org/nd/"
+  },
+  {
+    "code": "nso",
+    "name": "Northern Sotho",
+    "jwUrl": "https://www.jw.org/nso/"
+  },
+  {
+    "code": "no",
+    "name": "Norwegian",
+    "jwUrl": "https://www.jw.org/no/"
+  },
+  {
+    "code": "nse",
+    "name": "nse",
+    "jwUrl": "https://www.jw.org/nse/"
+  },
+  {
+    "code": "nse-mz",
+    "name": "nse (Mozambique)",
+    "jwUrl": "https://www.jw.org/nse-mz/"
+  },
+  {
+    "code": "nsi",
+    "name": "nsi",
+    "jwUrl": "https://www.jw.org/nsi/"
+  },
+  {
+    "code": "nsl",
+    "name": "nsl",
+    "jwUrl": "https://www.jw.org/nsl/"
+  },
+  {
+    "code": "nso-x-spl",
+    "name": "nso-x-spl",
+    "jwUrl": "https://www.jw.org/nso-x-spl/"
+  },
+  {
+    "code": "nsx",
+    "name": "nsx",
+    "jwUrl": "https://www.jw.org/nsx/"
+  },
+  {
+    "code": "ny",
+    "name": "Nyanja",
+    "jwUrl": "https://www.jw.org/ny/"
+  },
+  {
+    "code": "nya",
+    "name": "Nyanja",
+    "jwUrl": "https://www.jw.org/nya/"
+  },
+  {
+    "code": "nyn",
+    "name": "Nyankole",
+    "jwUrl": "https://www.jw.org/nyn/"
+  },
+  {
+    "code": "tog",
+    "name": "Nyasa Tonga",
+    "jwUrl": "https://www.jw.org/tog/"
+  },
+  {
+    "code": "nyk",
+    "name": "nyk",
+    "jwUrl": "https://www.jw.org/nyk/"
+  },
+  {
+    "code": "nyu",
+    "name": "nyu",
+    "jwUrl": "https://www.jw.org/nyu/"
+  },
+  {
+    "code": "nyy-x-nkn",
+    "name": "nyy-x-nkn",
+    "jwUrl": "https://www.jw.org/nyy-x-nkn/"
+  },
+  {
+    "code": "nzi",
+    "name": "Nzima",
+    "jwUrl": "https://www.jw.org/nzi/"
+  },
+  {
+    "code": "nzs",
+    "name": "nzs",
+    "jwUrl": "https://www.jw.org/nzs/"
+  },
+  {
+    "code": "ann",
+    "name": "Obolo",
+    "jwUrl": "https://www.jw.org/ann/"
+  },
+  {
+    "code": "or",
+    "name": "Odia",
+    "jwUrl": "https://www.jw.org/or/"
+  },
+  {
+    "code": "ogo",
+    "name": "ogo",
+    "jwUrl": "https://www.jw.org/ogo/"
+  },
+  {
+    "code": "oke",
+    "name": "oke",
+    "jwUrl": "https://www.jw.org/oke/"
+  },
+  {
+    "code": "omb",
+    "name": "omb",
+    "jwUrl": "https://www.jw.org/omb/"
+  },
+  {
+    "code": "om",
+    "name": "Oromo",
+    "jwUrl": "https://www.jw.org/om/"
+  },
+  {
+    "code": "os-x-dgr",
+    "name": "os-x-dgr",
+    "jwUrl": "https://www.jw.org/os-x-dgr/"
+  },
+  {
+    "code": "os",
+    "name": "Ossetic",
+    "jwUrl": "https://www.jw.org/os/"
+  },
+  {
+    "code": "ote",
+    "name": "ote",
+    "jwUrl": "https://www.jw.org/ote/"
+  },
+  {
+    "code": "otm",
+    "name": "otm",
+    "jwUrl": "https://www.jw.org/otm/"
+  },
+  {
+    "code": "ots",
+    "name": "ots",
+    "jwUrl": "https://www.jw.org/ots/"
+  },
+  {
+    "code": "pau",
+    "name": "Palauan",
+    "jwUrl": "https://www.jw.org/pau/"
+  },
+  {
+    "code": "pag",
+    "name": "Pangasinan",
+    "jwUrl": "https://www.jw.org/pag/"
+  },
+  {
+    "code": "pap-x-paa",
+    "name": "pap-x-paa",
+    "jwUrl": "https://www.jw.org/pap-x-paa/"
+  },
+  {
+    "code": "pap",
+    "name": "Papiamento",
+    "jwUrl": "https://www.jw.org/pap/"
+  },
+  {
+    "code": "ps",
+    "name": "Pashto",
+    "jwUrl": "https://www.jw.org/ps/"
+  },
+  {
+    "code": "pbb",
+    "name": "pbb",
+    "jwUrl": "https://www.jw.org/pbb/"
+  },
+  {
+    "code": "pem",
+    "name": "pem",
+    "jwUrl": "https://www.jw.org/pem/"
+  },
+  {
+    "code": "pdc",
+    "name": "Pennsylvania German",
+    "jwUrl": "https://www.jw.org/pdc/"
+  },
+  {
+    "code": "fa",
+    "name": "Persian",
+    "jwUrl": "https://www.jw.org/fa/"
+  },
+  {
+    "code": "phm",
+    "name": "phm",
+    "jwUrl": "https://www.jw.org/phm/"
+  },
+  {
+    "code": "pid",
+    "name": "pid",
+    "jwUrl": "https://www.jw.org/pid/"
+  },
+  {
+    "code": "pis",
+    "name": "Pijin",
+    "jwUrl": "https://www.jw.org/pis/"
+  },
+  {
+    "code": "pdt",
+    "name": "Plautdietsch",
+    "jwUrl": "https://www.jw.org/pdt/"
+  },
+  {
+    "code": "pls",
+    "name": "pls",
+    "jwUrl": "https://www.jw.org/pls/"
+  },
+  {
+    "code": "pma",
+    "name": "pma",
+    "jwUrl": "https://www.jw.org/pma/"
+  },
+  {
+    "code": "poh",
+    "name": "poh",
+    "jwUrl": "https://www.jw.org/poh/"
+  },
+  {
+    "code": "pon",
+    "name": "Pohnpeian",
+    "jwUrl": "https://www.jw.org/pon/"
+  },
+  {
+    "code": "poi",
+    "name": "poi",
+    "jwUrl": "https://www.jw.org/poi/"
+  },
+  {
+    "code": "pl",
+    "name": "Polish",
+    "jwUrl": "https://www.jw.org/pl/"
+  },
+  {
+    "code": "pt",
+    "name": "Portuguese",
+    "jwUrl": "https://www.jw.org/pt/"
+  },
+  {
+    "code": "pt-ao",
+    "name": "Portuguese (Angola)",
+    "jwUrl": "https://www.jw.org/pt-ao/"
+  },
+  {
+    "code": "pt-mz",
+    "name": "Portuguese (Mozambique)",
+    "jwUrl": "https://www.jw.org/pt-mz/"
+  },
+  {
+    "code": "pov",
+    "name": "pov",
+    "jwUrl": "https://www.jw.org/pov/"
+  },
+  {
+    "code": "prl",
+    "name": "prl",
+    "jwUrl": "https://www.jw.org/prl/"
+  },
+  {
+    "code": "pso",
+    "name": "pso",
+    "jwUrl": "https://www.jw.org/pso/"
+  },
+  {
+    "code": "psr",
+    "name": "psr",
+    "jwUrl": "https://www.jw.org/psr/"
+  },
+  {
+    "code": "pa",
+    "name": "Punjabi",
+    "jwUrl": "https://www.jw.org/pa/"
+  },
+  {
+    "code": "pa-latn",
+    "name": "Punjabi (Latin)",
+    "jwUrl": "https://www.jw.org/pa-latn/"
+  },
+  {
+    "code": "pys",
+    "name": "pys",
+    "jwUrl": "https://www.jw.org/pys/"
+  },
+  {
+    "code": "qub",
+    "name": "qub",
+    "jwUrl": "https://www.jw.org/qub/"
+  },
+  {
+    "code": "quz",
+    "name": "Quechua",
+    "jwUrl": "https://www.jw.org/quz/"
+  },
+  {
+    "code": "qu",
+    "name": "Quechua",
+    "jwUrl": "https://www.jw.org/qu/"
+  },
+  {
+    "code": "que",
+    "name": "Quechua",
+    "jwUrl": "https://www.jw.org/que/"
+  },
+  {
+    "code": "qug-x-qix",
+    "name": "qug-x-qix",
+    "jwUrl": "https://www.jw.org/qug-x-qix/"
+  },
+  {
+    "code": "qus",
+    "name": "qus",
+    "jwUrl": "https://www.jw.org/qus/"
+  },
+  {
+    "code": "quw",
+    "name": "quw",
+    "jwUrl": "https://www.jw.org/quw/"
+  },
+  {
+    "code": "quy",
+    "name": "quy",
+    "jwUrl": "https://www.jw.org/quy/"
+  },
+  {
+    "code": "qvi",
+    "name": "qvi",
+    "jwUrl": "https://www.jw.org/qvi/"
+  },
+  {
+    "code": "qvw",
+    "name": "qvw",
+    "jwUrl": "https://www.jw.org/qvw/"
+  },
+  {
+    "code": "qvz",
+    "name": "qvz",
+    "jwUrl": "https://www.jw.org/qvz/"
+  },
+  {
+    "code": "rap",
+    "name": "Rapanui",
+    "jwUrl": "https://www.jw.org/rap/"
+  },
+  {
+    "code": "rar",
+    "name": "Rarotongan",
+    "jwUrl": "https://www.jw.org/rar/"
+  },
+  {
+    "code": "rcf",
+    "name": "rcf",
+    "jwUrl": "https://www.jw.org/rcf/"
+  },
+  {
+    "code": "rmc-sk",
+    "name": "rmc (Slovakia)",
+    "jwUrl": "https://www.jw.org/rmc-sk/"
+  },
+  {
+    "code": "rml-ru",
+    "name": "rml (Russia)",
+    "jwUrl": "https://www.jw.org/rml-ru/"
+  },
+  {
+    "code": "rmn-cyrl",
+    "name": "rmn (Cyrillic)",
+    "jwUrl": "https://www.jw.org/rmn-cyrl/"
+  },
+  {
+    "code": "rmn-x-rm",
+    "name": "rmn-x-rm",
+    "jwUrl": "https://www.jw.org/rmn-x-rm/"
+  },
+  {
+    "code": "rmn-x-rmb",
+    "name": "rmn-x-rmb",
+    "jwUrl": "https://www.jw.org/rmn-x-rmb/"
+  },
+  {
+    "code": "rmn-x-rme",
+    "name": "rmn-x-rme",
+    "jwUrl": "https://www.jw.org/rmn-x-rme/"
+  },
+  {
+    "code": "rmn-x-rmg",
+    "name": "rmn-x-rmg",
+    "jwUrl": "https://www.jw.org/rmn-x-rmg/"
+  },
+  {
+    "code": "rmo",
+    "name": "rmo",
+    "jwUrl": "https://www.jw.org/rmo/"
+  },
+  {
+    "code": "rms",
+    "name": "rms",
+    "jwUrl": "https://www.jw.org/rms/"
+  },
+  {
+    "code": "rmy-x-lva",
+    "name": "rmy-x-lva",
+    "jwUrl": "https://www.jw.org/rmy-x-lva/"
+  },
+  {
+    "code": "rmy-x-rmv",
+    "name": "rmy-x-rmv",
+    "jwUrl": "https://www.jw.org/rmy-x-rmv/"
+  },
+  {
+    "code": "rnd",
+    "name": "rnd",
+    "jwUrl": "https://www.jw.org/rnd/"
+  },
+  {
+    "code": "rng",
+    "name": "rng",
+    "jwUrl": "https://www.jw.org/rng/"
+  },
+  {
+    "code": "ro-x-rnn",
+    "name": "ro-x-rnn",
+    "jwUrl": "https://www.jw.org/ro-x-rnn/"
+  },
+  {
+    "code": "ro",
+    "name": "Romanian",
+    "jwUrl": "https://www.jw.org/ro/"
+  },
+  {
+    "code": "rmy",
+    "name": "Romany",
+    "jwUrl": "https://www.jw.org/rmy/"
+  },
+  {
+    "code": "rmy-ar",
+    "name": "Romany (Argentina)",
+    "jwUrl": "https://www.jw.org/rmy-ar/"
+  },
+  {
+    "code": "rtm",
+    "name": "Rotuman",
+    "jwUrl": "https://www.jw.org/rtm/"
+  },
+  {
+    "code": "run",
+    "name": "Rundi",
+    "jwUrl": "https://www.jw.org/run/"
+  },
+  {
+    "code": "ru",
+    "name": "Russian",
+    "jwUrl": "https://www.jw.org/ru/"
+  },
+  {
+    "code": "sm",
+    "name": "Samoan",
+    "jwUrl": "https://www.jw.org/sm/"
+  },
+  {
+    "code": "sg",
+    "name": "Sango",
+    "jwUrl": "https://www.jw.org/sg/"
+  },
+  {
+    "code": "sbs",
+    "name": "sbs",
+    "jwUrl": "https://www.jw.org/sbs/"
+  },
+  {
+    "code": "gd",
+    "name": "Scottish Gaelic",
+    "jwUrl": "https://www.jw.org/gd/"
+  },
+  {
+    "code": "seh",
+    "name": "Sena",
+    "jwUrl": "https://www.jw.org/seh/"
+  },
+  {
+    "code": "sr-cyrl",
+    "name": "Serbian (Cyrillic)",
+    "jwUrl": "https://www.jw.org/sr-cyrl/"
+  },
+  {
+    "code": "sr-latn",
+    "name": "Serbian (Latin)",
+    "jwUrl": "https://www.jw.org/sr-latn/"
+  },
+  {
+    "code": "crs",
+    "name": "Seselwa Creole French",
+    "jwUrl": "https://www.jw.org/crs/"
+  },
+  {
+    "code": "sfb",
+    "name": "sfb",
+    "jwUrl": "https://www.jw.org/sfb/"
+  },
+  {
+    "code": "sfw",
+    "name": "sfw",
+    "jwUrl": "https://www.jw.org/sfw/"
+  },
+  {
+    "code": "sgg",
+    "name": "sgg",
+    "jwUrl": "https://www.jw.org/sgg/"
+  },
+  {
+    "code": "sn",
+    "name": "Shona",
+    "jwUrl": "https://www.jw.org/sn/"
+  },
+  {
+    "code": "shp",
+    "name": "shp",
+    "jwUrl": "https://www.jw.org/shp/"
+  },
+  {
+    "code": "shr",
+    "name": "shr",
+    "jwUrl": "https://www.jw.org/shr/"
+  },
+  {
+    "code": "sid",
+    "name": "Sidamo",
+    "jwUrl": "https://www.jw.org/sid/"
+  },
+  {
+    "code": "cmn-hans",
+    "name": "Simplified Chinese",
+    "jwUrl": "https://www.jw.org/cmn-hans/"
+  },
+  {
+    "code": "sd-deva",
+    "name": "Sindhi (Devanagari)",
+    "jwUrl": "https://www.jw.org/sd-deva/"
+  },
+  {
+    "code": "si",
+    "name": "Sinhala",
+    "jwUrl": "https://www.jw.org/si/"
+  },
+  {
+    "code": "skg-x-vz",
+    "name": "skg-x-vz",
+    "jwUrl": "https://www.jw.org/skg-x-vz/"
+  },
+  {
+    "code": "sk",
+    "name": "Slovak",
+    "jwUrl": "https://www.jw.org/sk/"
+  },
+  {
+    "code": "sl",
+    "name": "Slovenian",
+    "jwUrl": "https://www.jw.org/sl/"
+  },
+  {
+    "code": "soe",
+    "name": "soe",
+    "jwUrl": "https://www.jw.org/soe/"
+  },
+  {
+    "code": "sop",
+    "name": "sop",
+    "jwUrl": "https://www.jw.org/sop/"
+  },
+  {
+    "code": "nr",
+    "name": "South Ndebele",
+    "jwUrl": "https://www.jw.org/nr/"
+  },
+  {
+    "code": "alt",
+    "name": "Southern Altai",
+    "jwUrl": "https://www.jw.org/alt/"
+  },
+  {
+    "code": "st",
+    "name": "Southern Sotho",
+    "jwUrl": "https://www.jw.org/st/"
+  },
+  {
+    "code": "st-za",
+    "name": "Southern Sotho (South Africa)",
+    "jwUrl": "https://www.jw.org/st-za/"
+  },
+  {
+    "code": "es",
+    "name": "Spanish",
+    "jwUrl": "https://www.jw.org/es/"
+  },
+  {
+    "code": "sqk",
+    "name": "sqk",
+    "jwUrl": "https://www.jw.org/sqk/"
+  },
+  {
+    "code": "sqs",
+    "name": "sqs",
+    "jwUrl": "https://www.jw.org/sqs/"
+  },
+  {
+    "code": "srn",
+    "name": "Sranan Tongo",
+    "jwUrl": "https://www.jw.org/srn/"
+  },
+  {
+    "code": "srm",
+    "name": "srm",
+    "jwUrl": "https://www.jw.org/srm/"
+  },
+  {
+    "code": "ssp",
+    "name": "ssp",
+    "jwUrl": "https://www.jw.org/ssp/"
+  },
+  {
+    "code": "su",
+    "name": "Sundanese",
+    "jwUrl": "https://www.jw.org/su/"
+  },
+  {
+    "code": "sva-x-svl",
+    "name": "sva-x-svl",
+    "jwUrl": "https://www.jw.org/sva-x-svl/"
+  },
+  {
+    "code": "sva-x-svn",
+    "name": "sva-x-svn",
+    "jwUrl": "https://www.jw.org/sva-x-svn/"
+  },
+  {
+    "code": "svk",
+    "name": "svk",
+    "jwUrl": "https://www.jw.org/svk/"
+  },
+  {
+    "code": "sw",
+    "name": "Swahili",
+    "jwUrl": "https://www.jw.org/sw/"
+  },
+  {
+    "code": "ss",
+    "name": "Swati",
+    "jwUrl": "https://www.jw.org/ss/"
+  },
+  {
+    "code": "swc-x-swk",
+    "name": "swc-x-swk",
+    "jwUrl": "https://www.jw.org/swc-x-swk/"
+  },
+  {
+    "code": "sv",
+    "name": "Swedish",
+    "jwUrl": "https://www.jw.org/sv/"
+  },
+  {
+    "code": "gsw",
+    "name": "Swiss German",
+    "jwUrl": "https://www.jw.org/gsw/"
+  },
+  {
+    "code": "swl",
+    "name": "swl",
+    "jwUrl": "https://www.jw.org/swl/"
+  },
+  {
+    "code": "sxn",
+    "name": "sxn",
+    "jwUrl": "https://www.jw.org/sxn/"
+  },
+  {
+    "code": "ta-x-tlr",
+    "name": "ta-x-tlr",
+    "jwUrl": "https://www.jw.org/ta-x-tlr/"
+  },
+  {
+    "code": "ty",
+    "name": "Tahitian",
+    "jwUrl": "https://www.jw.org/ty/"
+  },
+  {
+    "code": "tg",
+    "name": "Tajik",
+    "jwUrl": "https://www.jw.org/tg/"
+  },
+  {
+    "code": "ta",
+    "name": "Tamil",
+    "jwUrl": "https://www.jw.org/ta/"
+  },
+  {
+    "code": "tap",
+    "name": "tap",
+    "jwUrl": "https://www.jw.org/tap/"
+  },
+  {
+    "code": "tar",
+    "name": "tar",
+    "jwUrl": "https://www.jw.org/tar/"
+  },
+  {
+    "code": "tt",
+    "name": "Tatar",
+    "jwUrl": "https://www.jw.org/tt/"
+  },
+  {
+    "code": "tca",
+    "name": "tca",
+    "jwUrl": "https://www.jw.org/tca/"
+  },
+  {
+    "code": "tcf",
+    "name": "tcf",
+    "jwUrl": "https://www.jw.org/tcf/"
+  },
+  {
+    "code": "tcs",
+    "name": "tcs",
+    "jwUrl": "https://www.jw.org/tcs/"
+  },
+  {
+    "code": "tdt",
+    "name": "tdt",
+    "jwUrl": "https://www.jw.org/tdt/"
+  },
+  {
+    "code": "tdx",
+    "name": "tdx",
+    "jwUrl": "https://www.jw.org/tdx/"
+  },
+  {
+    "code": "te",
+    "name": "Telugu",
+    "jwUrl": "https://www.jw.org/te/"
+  },
+  {
+    "code": "teo",
+    "name": "Teso",
+    "jwUrl": "https://www.jw.org/teo/"
+  },
+  {
+    "code": "tll",
+    "name": "Tetun Dili",
+    "jwUrl": "https://www.jw.org/tll/"
+  },
+  {
+    "code": "th",
+    "name": "Thai",
+    "jwUrl": "https://www.jw.org/th/"
+  },
+  {
+    "code": "ti",
+    "name": "Tigrinya",
+    "jwUrl": "https://www.jw.org/ti/"
+  },
+  {
+    "code": "tiv",
+    "name": "Tiv",
+    "jwUrl": "https://www.jw.org/tiv/"
+  },
+  {
+    "code": "tly-x-tly",
+    "name": "tly-x-tly",
+    "jwUrl": "https://www.jw.org/tly-x-tly/"
+  },
+  {
+    "code": "tnl",
+    "name": "tnl",
+    "jwUrl": "https://www.jw.org/tnl/"
+  },
+  {
+    "code": "tob",
+    "name": "tob",
+    "jwUrl": "https://www.jw.org/tob/"
+  },
+  {
+    "code": "toh",
+    "name": "toh",
+    "jwUrl": "https://www.jw.org/toh/"
+  },
+  {
+    "code": "toi",
+    "name": "toi",
+    "jwUrl": "https://www.jw.org/toi/"
+  },
+  {
+    "code": "toi-zw",
+    "name": "toi (Zimbabwe)",
+    "jwUrl": "https://www.jw.org/toi-zw/"
+  },
+  {
+    "code": "toj",
+    "name": "toj",
+    "jwUrl": "https://www.jw.org/toj/"
+  },
+  {
+    "code": "tpi",
+    "name": "Tok Pisin",
+    "jwUrl": "https://www.jw.org/tpi/"
+  },
+  {
+    "code": "tkl",
+    "name": "Tokelau",
+    "jwUrl": "https://www.jw.org/tkl/"
+  },
+  {
+    "code": "to",
+    "name": "Tongan",
+    "jwUrl": "https://www.jw.org/to/"
+  },
+  {
+    "code": "top",
+    "name": "top",
+    "jwUrl": "https://www.jw.org/top/"
+  },
+  {
+    "code": "cmn-hant",
+    "name": "Traditional Chinese",
+    "jwUrl": "https://www.jw.org/cmn-hant/"
+  },
+  {
+    "code": "tsc",
+    "name": "tsc",
+    "jwUrl": "https://www.jw.org/tsc/"
+  },
+  {
+    "code": "tsm",
+    "name": "tsm",
+    "jwUrl": "https://www.jw.org/tsm/"
+  },
+  {
+    "code": "ts",
+    "name": "Tsonga",
+    "jwUrl": "https://www.jw.org/ts/"
+  },
+  {
+    "code": "tso-mz",
+    "name": "Tsonga (Mozambique)",
+    "jwUrl": "https://www.jw.org/tso-mz/"
+  },
+  {
+    "code": "tsq",
+    "name": "tsq",
+    "jwUrl": "https://www.jw.org/tsq/"
+  },
+  {
+    "code": "tss",
+    "name": "tss",
+    "jwUrl": "https://www.jw.org/tss/"
+  },
+  {
+    "code": "tn",
+    "name": "Tswana",
+    "jwUrl": "https://www.jw.org/tn/"
+  },
+  {
+    "code": "tsz",
+    "name": "tsz",
+    "jwUrl": "https://www.jw.org/tsz/"
+  },
+  {
+    "code": "ttj",
+    "name": "ttj",
+    "jwUrl": "https://www.jw.org/ttj/"
+  },
+  {
+    "code": "tui",
+    "name": "tui",
+    "jwUrl": "https://www.jw.org/tui/"
+  },
+  {
+    "code": "tum",
+    "name": "Tumbuka",
+    "jwUrl": "https://www.jw.org/tum/"
+  },
+  {
+    "code": "tr",
+    "name": "Turkish",
+    "jwUrl": "https://www.jw.org/tr/"
+  },
+  {
+    "code": "tk",
+    "name": "Turkmen",
+    "jwUrl": "https://www.jw.org/tk/"
+  },
+  {
+    "code": "tk-cyrl",
+    "name": "Turkmen (Cyrillic)",
+    "jwUrl": "https://www.jw.org/tk-cyrl/"
+  },
+  {
+    "code": "tvl",
+    "name": "Tuvalu",
+    "jwUrl": "https://www.jw.org/tvl/"
+  },
+  {
+    "code": "tyv",
+    "name": "Tuvinian",
+    "jwUrl": "https://www.jw.org/tyv/"
+  },
+  {
+    "code": "twx",
+    "name": "twx",
+    "jwUrl": "https://www.jw.org/twx/"
+  },
+  {
+    "code": "tza",
+    "name": "tza",
+    "jwUrl": "https://www.jw.org/tza/"
+  },
+  {
+    "code": "tzh",
+    "name": "tzh",
+    "jwUrl": "https://www.jw.org/tzh/"
+  },
+  {
+    "code": "tzo",
+    "name": "tzo",
+    "jwUrl": "https://www.jw.org/tzo/"
+  },
+  {
+    "code": "udm",
+    "name": "Udmurt",
+    "jwUrl": "https://www.jw.org/udm/"
+  },
+  {
+    "code": "ug-x-uga",
+    "name": "ug-x-uga",
+    "jwUrl": "https://www.jw.org/ug-x-uga/"
+  },
+  {
+    "code": "ugn",
+    "name": "ugn",
+    "jwUrl": "https://www.jw.org/ugn/"
+  },
+  {
+    "code": "ugy",
+    "name": "ugy",
+    "jwUrl": "https://www.jw.org/ugy/"
+  },
+  {
+    "code": "uk",
+    "name": "Ukrainian",
+    "jwUrl": "https://www.jw.org/uk/"
+  },
+  {
+    "code": "umb",
+    "name": "Umbundu",
+    "jwUrl": "https://www.jw.org/umb/"
+  },
+  {
+    "code": "upv",
+    "name": "upv",
+    "jwUrl": "https://www.jw.org/upv/"
+  },
+  {
+    "code": "ur",
+    "name": "Urdu",
+    "jwUrl": "https://www.jw.org/ur/"
+  },
+  {
+    "code": "urh",
+    "name": "urh",
+    "jwUrl": "https://www.jw.org/urh/"
+  },
+  {
+    "code": "ug-cyrl",
+    "name": "Uyghur (Cyrillic)",
+    "jwUrl": "https://www.jw.org/ug-cyrl/"
+  },
+  {
+    "code": "uz-cyrl",
+    "name": "Uzbek (Cyrillic)",
+    "jwUrl": "https://www.jw.org/uz-cyrl/"
+  },
+  {
+    "code": "uz-latn",
+    "name": "Uzbek (Latin)",
+    "jwUrl": "https://www.jw.org/uz-latn/"
+  },
+  {
+    "code": "ve",
+    "name": "Venda",
+    "jwUrl": "https://www.jw.org/ve/"
+  },
+  {
+    "code": "vec",
+    "name": "Venetian",
+    "jwUrl": "https://www.jw.org/vec/"
+  },
+  {
+    "code": "vgt",
+    "name": "vgt",
+    "jwUrl": "https://www.jw.org/vgt/"
+  },
+  {
+    "code": "vi",
+    "name": "Vietnamese",
+    "jwUrl": "https://www.jw.org/vi/"
+  },
+  {
+    "code": "vmk",
+    "name": "vmk",
+    "jwUrl": "https://www.jw.org/vmk/"
+  },
+  {
+    "code": "wap",
+    "name": "wap",
+    "jwUrl": "https://www.jw.org/wap/"
+  },
+  {
+    "code": "war",
+    "name": "Waray",
+    "jwUrl": "https://www.jw.org/war/"
+  },
+  {
+    "code": "guc",
+    "name": "Wayuu",
+    "jwUrl": "https://www.jw.org/guc/"
+  },
+  {
+    "code": "wba",
+    "name": "wba",
+    "jwUrl": "https://www.jw.org/wba/"
+  },
+  {
+    "code": "cy",
+    "name": "Welsh",
+    "jwUrl": "https://www.jw.org/cy/"
+  },
+  {
+    "code": "wes-x-pgw",
+    "name": "wes-x-pgw",
+    "jwUrl": "https://www.jw.org/wes-x-pgw/"
+  },
+  {
+    "code": "vls",
+    "name": "West Flemish (Vlaams)",
+    "jwUrl": "https://www.jw.org/vls/"
+  },
+  {
+    "code": "pnb",
+    "name": "Western Panjabi",
+    "jwUrl": "https://www.jw.org/pnb/"
+  },
+  {
+    "code": "whg",
+    "name": "whg",
+    "jwUrl": "https://www.jw.org/whg/"
+  },
+  {
+    "code": "wls",
+    "name": "wls",
+    "jwUrl": "https://www.jw.org/wls/"
+  },
+  {
+    "code": "wal",
+    "name": "Wolaytta",
+    "jwUrl": "https://www.jw.org/wal/"
+  },
+  {
+    "code": "wo",
+    "name": "Wolof",
+    "jwUrl": "https://www.jw.org/wo/"
+  },
+  {
+    "code": "wyy-x-fnb",
+    "name": "wyy-x-fnb",
+    "jwUrl": "https://www.jw.org/wyy-x-fnb/"
+  },
+  {
+    "code": "wyy-x-ndr",
+    "name": "wyy-x-ndr",
+    "jwUrl": "https://www.jw.org/wyy-x-ndr/"
+  },
+  {
+    "code": "xav",
+    "name": "xav",
+    "jwUrl": "https://www.jw.org/xav/"
+  },
+  {
+    "code": "xh",
+    "name": "Xhosa",
+    "jwUrl": "https://www.jw.org/xh/"
+  },
+  {
+    "code": "xmc",
+    "name": "xmc",
+    "jwUrl": "https://www.jw.org/xmc/"
+  },
+  {
+    "code": "xml",
+    "name": "xml",
+    "jwUrl": "https://www.jw.org/xml/"
+  },
+  {
+    "code": "xmv",
+    "name": "xmv",
+    "jwUrl": "https://www.jw.org/xmv/"
+  },
+  {
+    "code": "sah",
+    "name": "Yakut",
+    "jwUrl": "https://www.jw.org/sah/"
+  },
+  {
+    "code": "yao",
+    "name": "Yao",
+    "jwUrl": "https://www.jw.org/yao/"
+  },
+  {
+    "code": "yap",
+    "name": "Yapese",
+    "jwUrl": "https://www.jw.org/yap/"
+  },
+  {
+    "code": "yaq",
+    "name": "yaq",
+    "jwUrl": "https://www.jw.org/yaq/"
+  },
+  {
+    "code": "ybb",
+    "name": "Yemba",
+    "jwUrl": "https://www.jw.org/ybb/"
+  },
+  {
+    "code": "yom-x-ibi",
+    "name": "yom-x-ibi",
+    "jwUrl": "https://www.jw.org/yom-x-ibi/"
+  },
+  {
+    "code": "yom-x-ymb",
+    "name": "yom-x-ymb",
+    "jwUrl": "https://www.jw.org/yom-x-ymb/"
+  },
+  {
+    "code": "yo",
+    "name": "Yoruba",
+    "jwUrl": "https://www.jw.org/yo/"
+  },
+  {
+    "code": "yua",
+    "name": "yua",
+    "jwUrl": "https://www.jw.org/yua/"
+  },
+  {
+    "code": "yup",
+    "name": "yup",
+    "jwUrl": "https://www.jw.org/yup/"
+  },
+  {
+    "code": "zab",
+    "name": "zab",
+    "jwUrl": "https://www.jw.org/zab/"
+  },
+  {
+    "code": "zai",
+    "name": "Zapotec",
+    "jwUrl": "https://www.jw.org/zai/"
+  },
+  {
+    "code": "zav",
+    "name": "zav",
+    "jwUrl": "https://www.jw.org/zav/"
+  },
+  {
+    "code": "zib",
+    "name": "zib",
+    "jwUrl": "https://www.jw.org/zib/"
+  },
+  {
+    "code": "zne",
+    "name": "zne",
+    "jwUrl": "https://www.jw.org/zne/"
+  },
+  {
+    "code": "zpa",
+    "name": "zpa",
+    "jwUrl": "https://www.jw.org/zpa/"
+  },
+  {
+    "code": "zpd",
+    "name": "zpd",
+    "jwUrl": "https://www.jw.org/zpd/"
+  },
+  {
+    "code": "zu",
+    "name": "Zulu",
+    "jwUrl": "https://www.jw.org/zu/"
+  }
+]
