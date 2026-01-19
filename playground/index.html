@@ -144,6 +144,7 @@
         <h1>Eburon Playground</h1>
         <div class="nav-item active" onclick="showSection('llm')">Ollama LLM</div>
         <div class="nav-item" onclick="showSection('whisper')">Whisper STT</div>
+        <div class="nav-item" onclick="showSection('webspeech')">Web Speech API</div>
     </div>
 
     <div class="main">
@@ -151,7 +152,8 @@
             <label>Select Service</label>
             <select id="serviceSelector" aria-label="Select Service" onchange="showSection(this.value)">
                 <option value="llm">Ollama LLM</option>
-                <option value="whisper">Whisper STT</option>
+                <option value="whisper">Whisper STT (VPS)</option>
+                <option value="webspeech">Web Speech API (Browser)</option>
             </select>
         </div>
 
@@ -200,6 +202,38 @@
                 <p class="api-docs-meta">Returns: Plain Text (UTF-8)</p>
             </div>
         </div>
+
+        <!-- Web Speech API Section -->
+        <div id="webspeech" class="section">
+            <h2>Web Speech API (Browser Native)</h2>
+            <p class="api-docs-meta">Free, no API key required. Uses your browser's built-in speech recognition.</p>
+            <div id="webSpeechStatus" class="status-badge offline">Ready</div>
+
+            <div class="form-group">
+                <label>Language</label>
+                <select id="webSpeechLang" aria-label="Select Language">
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                    <option value="ja-JP">Japanese</option>
+                    <option value="zh-CN">Chinese (Mandarin)</option>
+                    <option value="ko-KR">Korean</option>
+                    <option value="pt-BR">Portuguese (Brazil)</option>
+                    <option value="tl-PH">Tagalog</option>
+                </select>
+            </div>
+
+            <div class="button-row">
+                <button id="webSpeechStartBtn">Start Listening</button>
+                <button id="webSpeechStopBtn" class="danger" disabled>Stop</button>
+            </div>
+
+            <div class="log-area" id="webSpeechLog">
+                <div class="log-entry msg-placeholder">Speech results will appear here...</div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -218,6 +252,7 @@
             const navItems = document.querySelectorAll('.nav-item');
             if (id === 'llm') navItems[0].classList.add('active');
             else if (id === 'whisper') navItems[1].classList.add('active');
+            else if (id === 'webspeech') navItems[2].classList.add('active');
             
             // Sync Dropdown
             document.getElementById('serviceSelector').value = id;
@@ -342,6 +377,93 @@
 
         recordBtn.onclick = startWhisper;
         stopBtn.onclick = stopWhisper;
+
+        // --- Web Speech API Logic ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        const webSpeechStatus = document.getElementById('webSpeechStatus');
+        const webSpeechLog = document.getElementById('webSpeechLog');
+        const webSpeechStartBtn = document.getElementById('webSpeechStartBtn');
+        const webSpeechStopBtn = document.getElementById('webSpeechStopBtn');
+        const webSpeechLang = document.getElementById('webSpeechLang');
+
+        if (!SpeechRecognition) {
+            webSpeechStatus.textContent = "Not Supported";
+            webSpeechStatus.className = "status-badge offline";
+            webSpeechStartBtn.disabled = true;
+        }
+
+        function startWebSpeech() {
+            if (!SpeechRecognition) return alert("Web Speech API not supported in this browser.");
+            
+            recognition = new SpeechRecognition();
+            recognition.lang = webSpeechLang.value;
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
+            recognition.onstart = () => {
+                webSpeechStatus.textContent = "Listening...";
+                webSpeechStatus.className = "status-badge online";
+                webSpeechStartBtn.disabled = true;
+                webSpeechStopBtn.disabled = false;
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript = transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    const div = document.createElement('div');
+                    div.className = 'log-entry';
+                    const time = new Date().toLocaleTimeString();
+                    div.innerHTML = `<div class="log-time">${time}</div><div class="log-text">${finalTranscript}</div>`;
+                    webSpeechLog.prepend(div);
+                }
+
+                // Update status with interim results
+                if (interimTranscript) {
+                    webSpeechStatus.textContent = `Hearing: "${interimTranscript.slice(0, 30)}..."`;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Web Speech error:", event.error);
+                webSpeechStatus.textContent = `Error: ${event.error}`;
+                webSpeechStatus.className = "status-badge offline";
+                stopWebSpeech();
+            };
+
+            recognition.onend = () => {
+                // Auto-restart if still active
+                if (!webSpeechStartBtn.disabled) return;
+                try { recognition.start(); } catch(e) { stopWebSpeech(); }
+            };
+
+            recognition.start();
+        }
+
+        function stopWebSpeech() {
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+            webSpeechStartBtn.disabled = false;
+            webSpeechStopBtn.disabled = true;
+            webSpeechStatus.textContent = "Ready";
+            webSpeechStatus.className = "status-badge offline";
+        }
+
+        webSpeechStartBtn.onclick = startWebSpeech;
+        webSpeechStopBtn.onclick = stopWebSpeech;
 
     </script>
 </body>
