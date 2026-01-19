@@ -7,7 +7,7 @@
     "dev": "concurrently \"npm run server\" \"vite\"",
     "build": "concurrently \"npm run server\" \"vite build\"",
     "preview": "vite preview",
-    "server": "cd whisper-server && uvicorn main:app --host 0.0.0.0 --port 8000"
+    "server": "python3 whisper-server/websocket_server.py"
   },
   "dependencies": {
     "@google/genai": "^1.15.0",
