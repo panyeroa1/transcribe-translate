@@ -4,20 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "concurrently \"npm run server\" \"vite\"",
+    "build": "concurrently \"npm run server\" \"vite build\"",
+    "preview": "vite preview",
+    "server": "cd whisper-server && uvicorn main:app --host 0.0.0.0 --port 8000"
   },
   "dependencies": {
-    "lit": "^3.3.0",
-    "@lit/context": "^1.1.5",
     "@google/genai": "^1.15.0",
-    "three": "^0.182.0",
-    "@supabase/supabase-js": "^2.48.1"
+    "@lit/context": "^1.1.5",
+    "@supabase/supabase-js": "^2.48.1",
+    "lit": "^3.3.0",
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    
+    "concurrently": "^9.2.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

@@ -147,8 +147,10 @@ const CARTESIA_VOICES: Record<string, { male: string; female: string }> = {
   'ja': { male: '44863732-e415-4084-8ba1-deabe34ce3d2', female: '44863732-e415-4084-8ba1-deabe34ce3d2' }, // Japanese Children Book (Unisex fallback)
   'hi': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '3b554273-4299-48b9-9aaf-eefd438e3941' }, // Indian Lady
   'en-GB': { male: '4d2fd738-3b3d-4368-957a-bb4805275bd9', female: '71a7ad14-091c-4e8e-a314-022ece01c121' }, // British variants
-  'tl': { male: '5439b7ce-44b2-48e2-9929-889e4f4368dc', female: '5439b7ce-44b2-48e2-9929-889e4f4368dc' }, // Filipino (Tagalog) - User provided
-  'itw': { male: 'f82aaf5b-1e30-4912-bf4c-78787847ee46', female: 'f82aaf5b-1e30-4912-bf4c-78787847ee46' }, // Itawit - User provided
+  'tl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: 'f786b574-daa5-4673-aa0c-cbe3e8534c02' }, // Tagalog (Philippines) - Theo / Katie
+  'itw': { male: 'f82aaf5b-1e30-4912-bf4c-78787847ee46', female: 'f82aaf5b-1e30-4912-bf4c-78787847ee46' }, // Itawit
+  'nl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: 'e07c00bc-4134-4eae-9ea4-1a55fb45746b' }, // Dutch - Theo / Brooke
+  'byv': { male: '5ee9feff-1265-424a-9d7f-8e4d431a12c7', female: '829ccd10-f8b3-43cd-b8a0-4aeaa81f3b30' }, // Medumba - Ronald / Linda
 };
 
 // STT Provider options
@@ -269,6 +271,12 @@ export class GdmLiveAudio extends LitElement {
   private speakerGenderMap: Map<number, 'male' | 'female'> = new Map();
   private lastSpeakerGender: 'male' | 'female' = 'male';
   private debounceTimer: any = null;
+
+  // Diarization & Gender Detection State
+  private audioSnapshotBuffer: Int16Array[] = [];
+  private lastSnapshotTime = 0;
+  private readonly SNAPSHOT_INTERVAL_MS = 15000;
+  private isProcessingSnapshot = false;
 
   // Robustness State
   private deepgramHeartbeat?: any;
@@ -687,7 +695,7 @@ export class GdmLiveAudio extends LitElement {
   }
 
   // Ollama translation API
-  private async translateWithOllama(text: string, sourceLang: string, targetLang: string): Promise<string> {
+  private async translateWithOllama(text: string, sourceLang: string, targetLang: string, gender: 'male' | 'female' = 'male'): Promise<string> {
     const langAObj = LANGUAGES.find(l => l.code === sourceLang);
     const langBObj = LANGUAGES.find(l => l.code === targetLang);
 
@@ -703,7 +711,7 @@ Target Language: ${langBObj?.name || targetLang}
       text,
       source_lang: sourceLang,
       target_lang: targetLang,
-      context_note: context
+      context_note: `${context}\nSpeaker Gender: ${gender}`
     });
     try {
       const res = await fetch('http://168.231.78.113:11434/api/chat', {
@@ -859,7 +867,7 @@ Target Language: ${langBObj?.name || targetLang}
       this.sessionPromise = ai.live.connect({
         model: model,
         callbacks: {
-          onopen: () => this.updateStatus(`Gemini Live Active (${voiceName})`),
+          onopen: () => this.updateStatus(`Orbit Live Active (${voiceName})`),
           onmessage: async (message: LiveServerMessage) => {
             const audio = message.serverContent?.modelTurn?.parts[0]?.inlineData;
             if (audio) {
@@ -915,7 +923,7 @@ Target Language: ${langBObj?.name || targetLang}
   }
 
   private async initGeminiSTT() {
-    const model = 'gemini-2.0-flash-exp';
+    const model = 'gemini-2.5-flash-native-audio-preview-12-2025';
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       this.sttSessionPromise = ai.live.connect({
@@ -930,23 +938,30 @@ Target Language: ${langBObj?.name || targetLang}
                 // Append to current turn as 'user' (streaming)
                 this.appendToTranscription(text, 'user', 'neutral', this.langA, 0, 'male');
 
-                // Trigger translation pipeline
-                const targetLang = this.langB;
-                if (this.selectedProvider === 'ollama-cartesia') {
-                  this.translateWithOllama(text, this.langA, targetLang).then((translated) => {
-                    this.appendToTranscription(translated, 'agent', 'neutral', targetLang, 0, 'male');
-                    this.speakWithCartesia(translated, 'male');
-                  });
+                const gender = this.speakerGenderMap.get(0) || 'male';
+                if (this.selectedSttProvider === 'gemini') {
+                  // For Gemini, we treat it similarly to interim results until turnComplete
+                  this.updateRealtimeUserTranscription(text, true, 'neutral', this.langA, 0, gender);
                 }
-                // Note: We might want to wait for turnComplete to translate whole sentence? 
-                // But for realtime we can't wait. 
-                // However, translating every token is bad for Ollama.
-                // We definitely need debouncing or sentence-end detection if Gemini streams tokens.
-                // Given complexities, we'll assume Gemini sends reasonably chunks or we accept the chatter.
               }
             }
             if (message.serverContent?.turnComplete) {
-              this.transcriptionHistory = [...this.transcriptionHistory, ...this.currentTurnSegments];
+              // Finalize Gemini turn
+              const interim = this.currentInterimBySpeaker.get(0);
+              if (interim) {
+                const gender = interim.gender || 'male';
+                const sourceLang = interim.language || this.langA;
+                const targetLang = sourceLang.startsWith(this.langA.split('-')[0]) ? this.langB : this.langA;
+                this.transcriptionHistory = [...this.transcriptionHistory, { ...interim, isInterim: false }];
+                this.currentInterimBySpeaker.delete(0);
+                if (this.selectedProvider.startsWith('ollama')) {
+                  this.translateWithOllama(interim.text, sourceLang, targetLang, gender).then((translated) => {
+                    this.appendToTranscription(translated, 'agent', 'neutral', targetLang, 0, gender);
+                    if (this.selectedProvider === 'ollama-cartesia') this.speakWithCartesia(translated, gender);
+                    else if (this.selectedProvider === 'ollama-elevenlabs') this.speakWithElevenLabs(translated, gender);
+                  });
+                }
+              }
               this.currentTurnSegments = [];
             }
           },
@@ -978,7 +993,7 @@ Target Language: ${langBObj?.name || targetLang}
 
     this.deepgramSocket.onopen = () => {
       this.reconnectAttempts = 0;
-      this.updateStatus('Connected to Deepgram STT');
+      this.updateStatus('Connected to Orbits Beta STT');
       // 5s Heartbeat to keep socket alive across proxies
       this.deepgramHeartbeat = setInterval(() => {
         if (this.deepgramSocket?.readyState === WebSocket.OPEN) {
@@ -1050,12 +1065,12 @@ Target Language: ${langBObj?.name || targetLang}
 
             // Route based on selected provider
             if (this.selectedProvider === 'ollama-cartesia') {
-              this.translateWithOllama(transcript, detectedLang, targetLang).then((translated) => {
+              this.translateWithOllama(transcript, detectedLang, targetLang, gender).then((translated) => {
                 this.appendToTranscription(translated, 'agent', sentiment, targetLang, speakerId, gender);
                 this.speakWithCartesia(translated, gender);
               });
             } else if (this.selectedProvider === 'ollama-elevenlabs') {
-              this.translateWithOllama(transcript, detectedLang, targetLang).then((translated) => {
+              this.translateWithOllama(transcript, detectedLang, targetLang, gender).then((translated) => {
                 this.appendToTranscription(translated, 'agent', sentiment, targetLang, speakerId, gender);
                 this.speakWithElevenLabs(translated, gender);
               });
@@ -1110,17 +1125,21 @@ Target Language: ${langBObj?.name || targetLang}
       if (this.debounceTimer) clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(() => {
         const targetLang = (language || 'en-US').toLowerCase().startsWith(this.langA.split('-')[0]) ? this.langB : this.langA;
-        // Only translate if we have enough content (e.g. > 15 chars) to make sense
         if (text.length > 15) {
-          this.translateWithOllama(text, language || 'en-US', targetLang).then(translation => {
+          const gender = this.speakerGenderMap.get(speakerId) || 'male';
+          this.translateWithOllama(text, language || 'en-US', targetLang, gender).then(translation => {
             const current = this.currentInterimBySpeaker.get(speakerId);
-            if (current && current.text === text) { // Ensure we are still on the same segment
+            if (current && current.text === text) {
               this.currentInterimBySpeaker.set(speakerId, { ...current, translation });
               this.requestUpdate();
+              if (/[.!?]$/.test(text.trim()) && this.selectedProvider.startsWith('ollama')) {
+                if (this.selectedProvider === 'ollama-cartesia') this.speakWithCartesia(translation, gender);
+                else if (this.selectedProvider === 'ollama-elevenlabs') this.speakWithElevenLabs(translation, gender);
+              }
             }
           });
         }
-      }, 600); // 600ms debounce
+      }, 600);
     } else {
       this.currentInterimBySpeaker.delete(speakerId);
     }
@@ -1128,6 +1147,155 @@ Target Language: ${langBObj?.name || targetLang}
     // Merge interim segments with agent responses in currentTurnSegments
     const agentSegments = this.currentTurnSegments.filter(s => s.type === 'agent');
     this.currentTurnSegments = [...agentSegments, ...Array.from(this.currentInterimBySpeaker.values())];
+  }
+
+  private async takeAudioSnapshot() {
+    if (this.audioSnapshotBuffer.length === 0 || this.isProcessingSnapshot) return;
+
+    this.isProcessingSnapshot = true;
+    this.lastSnapshotTime = Date.now();
+
+    const bufferToProcess = [...this.audioSnapshotBuffer];
+    this.audioSnapshotBuffer = [];
+
+    // Combine buffers
+    const totalLength = bufferToProcess.reduce((acc, curr) => acc + curr.length, 0);
+    const combined = new Int16Array(totalLength);
+    let offset = 0;
+    for (const b of bufferToProcess) {
+      combined.set(b, offset);
+      offset += b.length;
+    }
+
+    try {
+      const wavBlob = this.encodeWAV(combined, 16000);
+      const fileUri = await this.uploadToGeminiFileApi(wavBlob);
+      if (fileUri) {
+        await this.processAudioDiarization(fileUri);
+      }
+    } catch (err) {
+      console.error('Failed to take audio snapshot:', err);
+    } finally {
+      this.isProcessingSnapshot = false;
+    }
+  }
+
+  private encodeWAV(samples: Int16Array, sampleRate: number): Blob {
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 32 + samples.length * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, samples.length * 2, true);
+
+    let index = 44;
+    for (let i = 0; i < samples.length; i++) {
+      view.setInt16(index, samples[i], true);
+      index += 2;
+    }
+
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
+  private async uploadToGeminiFileApi(blob: Blob): Promise<string | null> {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return null;
+
+    try {
+      // Step 1: Initialize resumable upload
+      const initResponse = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'X-Goog-Upload-Protocol': 'resumable',
+          'X-Goog-Upload-Command': 'start',
+          'X-Goog-Upload-Header-Content-Length': blob.size.toString(),
+          'X-Goog-Upload-Header-Content-Type': 'audio/wav',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ file: { display_name: `snapshot_${Date.now()}` } }),
+      });
+
+      const uploadUrl = initResponse.headers.get('x-goog-upload-url');
+      if (!uploadUrl) return null;
+
+      // Step 2: Upload bytes
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Length': blob.size.toString(),
+          'X-Goog-Upload-Offset': '0',
+          'X-Goog-Upload-Command': 'upload, finalize',
+        },
+        body: blob,
+      });
+
+      const fileInfo = await uploadResponse.json();
+      return fileInfo.file.uri;
+    } catch (err) {
+      console.error('Gemini File API upload failed:', err);
+      return null;
+    }
+  }
+
+  private async processAudioDiarization(fileUri: string) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return;
+
+    const modelName = 'models/gemini-2.0-flash-exp'; // Using 2.0 Flash for speed/cost or 1.5 Pro for quality
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            role: "user",
+            parts: [
+              { text: "Perform speaker diarization on this audio. For each speaker, identify their ID (0, 1, 2...) and their likely gender (male/female). Return the result as a JSON array of objects: [{\"speakerId\": number, \"gender\": \"male\"|\"female\"}]. Do not return anything else." },
+              { file_data: { mime_type: "audio/wav", file_uri: fileUri } }
+            ]
+          }],
+          generationConfig: {
+            response_mime_type: "application/json",
+          }
+        }),
+      });
+
+      const result = await response.json();
+      const content = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (content) {
+        const diarization = JSON.parse(content);
+        if (Array.isArray(diarization)) {
+          for (const item of diarization) {
+            if (typeof item.speakerId === 'number' && (item.gender === 'male' || item.gender === 'female')) {
+              this.speakerGenderMap.set(item.speakerId, item.gender);
+              console.log(`Updated speaker ${item.speakerId} to gender ${item.gender}`);
+            }
+          }
+          this.requestUpdate();
+        }
+      }
+    } catch (err) {
+      console.error('Gemini Diarization failed:', err);
+    }
   }
 
   private appendToTranscription(text: string, type: 'user' | 'agent', sentiment?: 'positive' | 'negative' | 'neutral', language?: string, speaker?: number, gender?: 'male' | 'female', saveToSupabase = true) {
@@ -1194,6 +1362,14 @@ Target Language: ${langBObj?.name || targetLang}
         this.audioWorkletNode = new AudioWorkletNode(this.inputAudioContext, 'audio-processor');
         this.audioWorkletNode.port.onmessage = (e) => {
           if (this.isRecording) {
+            // Collect audio for snapshots
+            const pcm = new Int16Array(e.data);
+            this.audioSnapshotBuffer.push(pcm);
+
+            if (Date.now() - this.lastSnapshotTime > this.SNAPSHOT_INTERVAL_MS && !this.isProcessingSnapshot) {
+              this.takeAudioSnapshot();
+            }
+
             if (this.selectedSttProvider === 'gemini' && this.sttSession) {
               // Convert e.data (Int16Array in Blob/ArrayBuffer form?) to Base64
               // audio-processor usually sends serialized data.
@@ -1302,8 +1478,8 @@ Target Language: ${langBObj?.name || targetLang}
         </div>
         <div class="text">
           ${tokens.map((token, i) => html`<span class="word on" style="transition-delay: ${i * this.wordSpeedMs}ms">${token} </span>`)}
-          ${segment.translation ? html`<div class="translation-preview" style="opacity: 0.7; font-size: 0.9em; margin-top: 4px; color: var(--accent);">
-            Wait... ${segment.translation}
+          ${segment.isInterim && segment.translation && segment.translation.length > 5 ? html`<div class="translation-preview" style="opacity: 0.6; font-size: 0.85em; margin-top: 6px; color: var(--lime); font-style: italic;">
+            ${segment.translation}
           </div>` : ''}
         </div>
       </div>
@@ -1314,6 +1490,8 @@ Target Language: ${langBObj?.name || targetLang}
     const allSegments = [...this.transcriptionHistory, ...this.currentTurnSegments];
     const userSegments = allSegments.filter(s => s.type === 'user');
     const agentSegments = allSegments.filter(s => s.type === 'agent');
+
+    const displayAgentSegments = agentSegments;
 
     return html`
       <div class="status-toast ${this.status || this.error ? 'visible' : ''}">
@@ -1351,10 +1529,10 @@ Target Language: ${langBObj?.name || targetLang}
               <svg viewBox="0 0 24 24"><path d="M4 5h10M4 10h7M12 19l6-14 2 0-6 14h-2z" stroke="var(--lime)" stroke-linecap="round"/></svg>
               <span>Translation</span>
             </div>
-            <div class="hint">${agentSegments.length} lines</div>
+            <div class="hint">${displayAgentSegments.length} lines</div>
           </div>
           <div class="list" ${ref(this.trViewport)}>
-            ${agentSegments.map(s => this.renderMsg(s))}
+            ${displayAgentSegments.map(s => this.renderMsg(s))}
           </div>
         </section>
       </div>

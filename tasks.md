@@ -506,7 +506,7 @@ START LOG
 Timestamp: 2026-01-19 13:20
 Current behavior or state:
 
-- Header shows internal logs "Gemini Live Active Orus".
+- Header shows internal logs "Orbit Live Active Orus".
 - Settings changes are not persistent across reloads.
 - No database saving (Supabase) for session history.
 - Settings menu 'Apply' button does not automatically close the panel.
