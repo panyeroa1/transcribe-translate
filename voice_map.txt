@@ -1,0 +1,252 @@
+const CARTESIA_VOICES: Record<string, { male: string; female: string }> = {
+  'default': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' },
+  'ab': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ace': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ach': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'aa': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'af': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sq': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'alz': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'am': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ar': { male: 'f1cdfb4a-bf7d-4e83-916e-8f0802278315', female: '002622d8-19d0-4567-a16a-f99c7397c062' }, // Walid - Steady Presence / Huda - Approachable Speaker
+  'hy': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'as': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'av': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'awa': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ay': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'az': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ban': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bal': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bm': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bci': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ba': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'eu': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'btx': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bts': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bbc': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'be': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bem': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bn': { male: '2ba861ea-7cdc-43d1-8608-4045b5a41de5', female: '59ba7dee-8f9a-432f-a6c0-ffb33666b654' }, // Rubel - City Guide / Pooja - Everyday Assistant
+  'bew': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bho': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bcl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bs': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'br': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'bg': { male: 'd132064c-b931-4a80-bf0d-02a331ec4572', female: 'fcbecbcc-0cef-4615-8b5a-712fe1b39dd0' }, // Georgi - Conversationalist / Ivana - Instruction Provider
+  'bua': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'yue': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ca': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ceb': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ch': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ce': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ny': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'zh-CN': { male: 'eda5bbff-1ff1-4886-8ef1-4e69a77640a0', female: '7a5d4663-88ae-47b7-808e-8f9b9ee4127b' }, // Kai - Commercial Man / Hua - Sunny Support
+  'zh-TW': { male: 'eda5bbff-1ff1-4886-8ef1-4e69a77640a0', female: '7a5d4663-88ae-47b7-808e-8f9b9ee4127b' }, // Kai - Commercial Man / Hua - Sunny Support
+  'chk': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'cv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'co': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'crh-Cyrl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'crh-Latn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'hr': { male: 'a1a16724-b1f3-4b27-9e47-8a175115e93c', female: '2a2624ad-bd06-4563-81fd-0519742e25d2' }, // Ivan - Bar Companion / Petra - Strict Lecturer
+  'cs': { male: '89266bab-6e15-455d-8654-e18c440b0656', female: 'bdc4a3ce-2e22-4398-8cd6-76b7160d2298' }, // Petr - Pastor / Jana - Crisp Conversationalist
+  'da': { male: '926e0766-f380-4d77-aeb0-9aa4ebb16b38', female: 'c323c793-41f9-47b8-99dc-9b44b0440b84' }, // Soren - Executive Voice / Katrine - Calm Caregiver
+  'prs': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'dv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'din': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'doi': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'dom': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'nl': { male: '9e8db62d-056f-47f3-b3b6-1b05767f9176', female: '0eb213fe-4658-45bc-9442-33a48b24b133' }, // Daan - Business Baritone / Sanne - Clear Companion
+  'dyu': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'dz': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'en-US': { male: '5ee9feff-1265-424a-9d7f-8e4d431a12c7', female: 'e07c00bc-4134-4eae-9ea4-1a55fb45746b' }, // Ronald - Thinker / Brooke - Big Sister
+  'eo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'et': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ee': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'fo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'fj': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tl-PH': { male: 'c4cbcb7d-d9fa-4eac-b547-46831718ef58', female: '9261664a-c3d0-4200-9038-5466bcf3a09c' }, // Angelo - Calm Narrator / Luz - Casual Speaker
+  'fi': { male: 'ae1a833b-0d95-4b7f-8d05-d6418c6f8049', female: '65c34eec-42c9-4a75-a8bd-b676fb847b72' }, // Mikko - Narration Expert / Helmi - Warm Friend
+  'fon': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'fr-FR': { male: '0418348a-0ca2-4e90-9986-800fb8b3bbc0', female: 'a8a1eb38-5f15-4c1d-8722-7ac0f329727d' }, // Antoine - Stern Man / Calm French Woman
+  'fr-CA': { male: '0418348a-0ca2-4e90-9986-800fb8b3bbc0', female: 'a8a1eb38-5f15-4c1d-8722-7ac0f329727d' }, // Antoine - Stern Man / Calm French Woman
+  'fy': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'fur': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ff': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'gaa': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'gl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ka': { male: 'dbebd077-80cb-4bcf-b43b-4552f96341bb', female: '0bfbea6c-2f8f-4f86-b411-aa2316561e36' }, // Levan - Support Guide / Tamara - Support Specialist
+  'de-DE': { male: 'b7187e84-fe22-4344-ba4a-bc013fcb533e', female: '38aabb6a-f52b-4fb0-a3d1-988518f4dc06' }, // Sebastian - Orator / Alina - Engaging Assistant
+  'el': { male: 'b45eba5b-2215-4da7-9c7c-121c95ed7b81', female: '50849023-76e9-46c7-af52-9ec39888a165' }, // Nikos - Radio Storyteller / Despina - Motherly Woman
+  'gn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'gu': { male: '91925fe5-42ee-4ebe-96c1-c84b12a85a32', female: '4590a461-bc68-4a50-8d14-ac04f5923d22' }, // Amit - Sports Student / Isha - Learner
+  'ht': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'csy': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ha': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'haw': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'he': { male: '3e32f3c5-9ac0-4192-9994-87fdb277120f', female: '1daba551-67af-465e-a189-f91495aa2347' }, // Noam - Broadcaster / Yael - Casual Presence
+  'hil': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'hi': { male: '7e8cb11d-37af-476b-ab8f-25da99b18644', female: 'faf0731e-dfb9-4cfc-8119-259a79b27e12' }, // Anuj - Engaging Narrator / Riya - College Roommate
+  'hmn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'hu': { male: '36e0c00b-1bfd-4ad7-a0e8-928d4cadca00', female: 'e97c3b37-1aa5-46af-afb7-9545086aaa92' }, // Gabor - Reassuring Voice / Eszter - Customer Companion
+  'hrx': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'iba': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'is': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ig': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ilo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'id': { male: 'a053f6bc-7df4-40de-96d4-de026bc47ce8', female: 'b441c4fd-4910-4c55-ae56-f0291057e2cc' }, // Andi - Dynamic Presenter / Siti - Ad Narrator
+  'iu-Latn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'iu-Syrl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ga': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'it': { male: 'e5923af7-a329-4e9b-b95a-5ace4a083535', female: 'd718e944-b313-4998-b011-d1cc078d4ef3' }, // Lucio - Empath / Liv - Casual Friend
+  'jam': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ja-JP': { male: 'e8a863c6-22c7-4671-86ca-91cacffc038d', female: '2b568345-1d48-4047-b25f-7baccf842eb0' }, // Daisuke - Businessman / Yumiko - Friendly Agent
+  'jv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kac': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kn': { male: '6baae46d-1226-45b5-a976-c7f9b797aae2', female: '7c6219d2-e8d2-462c-89d8-7ecba7c75d65' }, // Prakash - Instructor / Divya - Joyful Narrator
+  'kr': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'pam': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kk': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kha': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'km': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'cgg': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kg': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'rw': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ktub': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kok': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kok-IN': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ko-KR': { male: 'af6beeea-d732-40b6-8292-73af0035b740', female: '304fdbd8-65e6-40d6-ab78-f9d18b9efdf9' }, // Byungtae - Enforcer / Jihyun - Anchorwoman
+  'kri': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ku': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ckb': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ky': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ltg': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'la': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lij': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'li': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ln': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lt': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lmo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lg': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'luo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lb': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mk': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mad': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mai': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mak': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mg': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ms': { male: '8281db18-6ac5-47bb-91a8-ce23a1f1d951', female: '83604597-55fa-4ccc-8357-730b313f353f' }, // Faiz - Family Guide / Aisyah - Chat Partner
+  'ms-Arab': { male: '8281db18-6ac5-47bb-91a8-ce23a1f1d951', female: '83604597-55fa-4ccc-8357-730b313f353f' }, // Faiz - Family Guide / Aisyah - Chat Partner
+  'ml': { male: '374b80da-e622-4dfc-90f6-1eeb13d331c9', female: 'b426013c-002b-4e89-8874-8cd20b68373a' }, // Vijay - Comfort Voice / Latha - Friendly Host
+  'mt': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mam': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'gv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mi': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mr': { male: 'f227bc18-3704-47fe-b759-8c78a450fdfa', female: '5c32dce6-936a-4892-b131-bafe474afe5f' }, // Suresh - Instruction Voice / Anika - Enthusiastic Seller
+  'mh': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mwr': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mfe': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mhr': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mni': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'min': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lus': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'mn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'my': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ncj': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'nd': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'nbl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'new': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ne': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'nko': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'no': { male: 'd6dca1b6-cdd8-4e9c-823c-e03979261740', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Lars - Casual Conversationalist / Default
+  'nus': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'oc': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'or': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'om': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'os': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'pag': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'pap': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ps': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'fa': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'pl': { male: '82a7fc13-2927-4e42-9b8a-bb1f9e506521', female: 'dcf62f33-7cff-4f20-85b2-2efaa68cbc32' }, // Tomek - Casual Companion / Zofia - Audiobook Muse
+  'pt-BR': { male: '6a360542-a117-4ed5-9e09-e8bf9b05eabb', female: 'd4b44b9a-82bc-4b65-b456-763fce4c52f9' }, // Tiago - Narration Expert / Beatriz - Support Guide
+  'pt-PT': { male: '6a360542-a117-4ed5-9e09-e8bf9b05eabb', female: 'd4b44b9a-82bc-4b65-b456-763fce4c52f9' }, // Tiago - Narration Expert / Beatriz - Support Guide
+  'pa': { male: '8bacd442-a107-4ec1-b6f1-2fcb3f6f4d56', female: '991c62ce-631f-48b0-8060-2a0ebecbd15b' }, // Gurpreet - Companion / Jaspreet - Commercial Woman
+  'pa-PK': { male: '8bacd442-a107-4ec1-b6f1-2fcb3f6f4d56', female: '991c62ce-631f-48b0-8060-2a0ebecbd15b' }, // Gurpreet - Companion / Jaspreet - Commercial Woman
+  'qu': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'kek': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'rom': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ro': { male: '3f64ef99-d87b-4b51-b217-df7351f7886a', female: '34acfaee-c556-41ee-a5f6-c687fb20357c' }, // Andrei - Conversationalist Guy / Andrada - Steady Speaker
+  'rn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ru': { male: '888b7df4-e165-4852-bfec-0ab2b96aaa46', female: '064b17af-d36b-4bfb-b003-be07dba1b649' }, // Dmitri - Gentle Voice / Tatiana - Friendly Storyteller
+  'se': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sm': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sg': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sa': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sat-Latn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sat-Olck': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'gd': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'nso': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sr': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'st': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'crs': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'shn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'scn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'szl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sd': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'si': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sk': { male: 'ca590fdc-df56-4d2e-94a4-ef5b423c7ddf', female: 'abf68668-6549-462c-8426-1fa7b466b91d' }, // Peter - Narrator Man / Katarina - Friendly Sales
+  'sl': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'so': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'es-ES': { male: '15d0c2e2-8d29-44c3-be23-d585d5f154a1', female: '5c5ad5e7-1020-476b-8b91-fdcbe9cc313c' }, // Pedro - Formal Speaker / Daniela - Relaxed Woman
+  'su': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sus': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sw': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ss': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sv': { male: '38a146c3-69d7-40ad-aada-76d5a2621758', female: 'f852eb8d-a177-48cd-bf63-7e4dcab61a36' }, // Anders - Nordic Baritone / Ingrid - Peaceful Guide
+  'ty': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tg': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tzm': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tzm-Tfng': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ta': { male: 'd2870b91-1b4c-47ab-81a8-3718d8e9c222', female: '25d2c432-139c-4035-bfd6-9baaabcdd006' }, // Arun - Lively Voice / Kavya - Warm Presence
+  'tt': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'te': { male: 'ebecd063-10f4-422e-a8ff-556ce5c4d4e4', female: '07bc462a-c644-49f1-baf7-82d5599131be' }, // Pavan - Bright Voice / Sindhu - Conversational Partner
+  'tet': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'th': { male: '5de076e9-7b28-4442-b279-e7d80d573505', female: 'ccc7bb22-dcd0-42e4-822e-0731b950972f' }, // Somchai - Star / Suda - Fortune Teller
+  'bo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ti': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tiv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tpi': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'to': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'lua': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ts': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tn': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tcy': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tum': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tr': { male: '39f753ef-b0eb-41cd-aa53-2f3c284f948f', female: 'fa7bfcdc-603c-4bf1-a600-a371400d2f8c' }, // Emre - Calming Speaker / Leyla - Story Companion
+  'tk': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tyv': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'tw': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'udm': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'uk': { male: '05ffab9c-d380-4909-8375-cd12f59238c3', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Oleh - Professional Guy / Default
+  'ur': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'ug': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'uz': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  've': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'vec': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'vi': { male: '0e58d60a-2f1a-4252-81bd-3db6af45fb41', female: '935a9060-373c-49e4-b078-f4ea6326987a' }, // Minh - Conversational Partner / Linh - Soft Presence
+  'war': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'cy': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'wo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'xh': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'sah': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'yi': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'yo': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'yua': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'zap': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+  'zu': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '21cd39e9-d975-430c-99d6-5a7a7bb62f6b' }, // Universal Fallback
+};

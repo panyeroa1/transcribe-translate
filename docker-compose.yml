@@ -1,0 +1,25 @@
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_WHISPER_API_URL=http://localhost:8000
+    depends_on:
+      - whisper
+
+  whisper:
+    build:
+      context: ./whisper-server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - WHISPER_MODEL_SIZE=small
+    volumes:
+      - ./whisper-server/cache:/root/.cache/huggingface

@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Orbit Sidebar</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-body: #050505;
+      --bg-surface: #111111;
+      --bg-chat-bubble: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #888888;
+      --accent: #fff;
+      --font: "Inter", -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0; background: var(--bg-body); color: var(--text-primary);
+      font-family: var(--font); height: 100vh; overflow: hidden;
+      display: flex; justify-content: center; align-items: center;
+    }
+
+    /* === MODAL === */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.98);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .modal-overlay.hidden { opacity: 0; pointer-events: none; }
+    
+    .modal-card { width: 100%; max-width: 360px; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+    .modal-header { font-size: 14px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px; }
+
+    .modal-input {
+      width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white;
+      border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 8px;
+    }
+
+    .modal-select-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+    .modal-select-group label { font-size: 10px; color: #555; font-weight: 700; text-transform: uppercase; }
+    .modal-select { 
+        width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #333; 
+        color: white; border-radius: 8px; font-size: 13px; cursor: pointer;
+    }
+
+    .mode-tabs { display: flex; background: #1a1a1a; padding: 4px; border-radius: 8px; margin: 10px 0; }
+    .mode-tab { flex: 1; border: none; background: transparent; color: #666; padding: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 6px; }
+    .mode-tab.active { background: #333; color: white; }
+
+    .btn-action { width: 100%; padding: 14px; background: white; color: black; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+
+    /* === MAIN APP === */
+    .app-container { width: 100%; max-width: 500px; height: 100%; display: flex; flex-direction: column; position: relative; }
+    @media (min-width: 501px) { .app-container { height: 95vh; border-radius: 16px; border: 1px solid #222; background: var(--bg-surface); overflow: hidden; } }
+
+    .header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; position: relative; }
+    .room-id { font-family: monospace; font-size: 16px; font-weight: 600; color: white; }
+    .share-row { display: flex; gap: 8px; }
+    .share-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .share-icon { width: 16px; height: 16px; fill: #888; }
+    .btn-leave { background: #dc2626 !important; }
+
+    .chat-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+    .msg-item { display: flex; flex-direction: column; gap: 4px; }
+    .msg-meta { font-size: 10px; color: #555; display: flex; justify-content: space-between; }
+    .msg-bubble { background: var(--bg-chat-bubble); padding: 12px 16px; border-radius: 4px 14px 14px 14px; font-size: 18px; color: #4ade80; border: 1px solid #222; }
+    .msg-item.me { align-items: flex-end; }
+    .msg-item.me .msg-bubble { background: #222; border-radius: 14px 4px 14px 14px; color: #eee; }
+
+    .footer { padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .controls-row { display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
+
+    .control-btn {
+      display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 50px;
+      background: #1a1a1a; border: 1px solid #333; color: #888; cursor: pointer;
+      font-size: 12px; font-weight: 600; flex: 1; max-width: 140px; justify-content: center;
+    }
+    .control-btn.mic-active { background: #dc2626; color: white; border-color: #ef4444; }
+    .control-btn.speaker-active { background: #15803d; color: white; border-color: #22c55e; }
+    .control-btn-icon { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    .raise-hand-btn { width: 48px; height: 48px; border-radius: 50%; background: #1a1a1a; border: 1px solid #333; color: white; cursor: pointer; font-size: 20px; }
+    .raise-hand-btn.raised { background: #f59e0b; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+
+<div id="welcomeModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">Orbit Setup</div>
+    
+    <input type="text" id="usernameInput" class="modal-input" placeholder="Your Name" maxlength="15">
+
+    <div class="modal-select-group">
+      <label>I Speak</label>
+      <select id="srcLang" class="modal-select" aria-label="Source Language"></select>
+    </div>
+
+    <div class="modal-select-group">
+      <label>I Listen (Translate to)</label>
+      <select id="tgtLang" class="modal-select" aria-label="Target Language"></select>
+    </div>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabCreate">Create</button>
+      <button class="mode-tab" id="tabJoin">Join</button>
+    </div>
+
+    <div id="createMode">
+      <button id="modalCreateBtn" class="btn-action">Start Session</button>
+    </div>
+    <div id="joinMode" class="hidden">
+      <input type="text" id="classIdInput" class="modal-input" placeholder="Room ID">
+      <button id="modalJoinBtn" class="btn-action">Connect</button>
+    </div>
+  </div>
+</div>
+
+<audio id="tts" autoplay></audio>
+
+<div class="app-container">
+  <div class="header">
+    <span id="roomIdDisplay" class="room-id">...</span>
+    <div class="share-row">
+      <button class="share-btn" id="copyBtn" aria-label="Copy Room ID"><svg class="share-icon" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 00-2 2v14h2V3h12V1zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg></button>
+      <button class="share-btn btn-leave" onclick="location.reload()" aria-label="Leave Room"><svg class="share-icon" style="fill:white" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/></svg></button>
+    </div>
+  </div>
+
+  <div id="chatArea" class="chat-area"></div>
+
+  <div class="footer">
+    <div class="controls-row">
+      <button id="speakerBtn" class="control-btn">
+        <svg class="control-btn-icon" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+        <span>Speaker Off</span>
+      </button>
+      <button id="raiseHandBtn" class="raise-hand-btn">✋</button>
+      <button id="micBtn" class="control-btn">
+        <svg class="control-btn-icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 00 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+        <span>Mic Off</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+    const INSTANCE_ID = Math.random().toString(36).substring(2);
+    let USER_NAME = "User";
+    let CURRENT_ROOM_ID = "";
+    let speakerOn = false;
+    
+    // API KEYS
+    const SUPABASE_URL = "https://mkmyfdqrejabgnymfmbb.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rbXlmZHFyZWphYmdueW1mbWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MzMxMzYsImV4cCI6MjA4MDAwOTEzNn0.x_1VnQ-HWWPwNe9jjafhD_uoH2dyCyjO2RaKOQhYoJw";
+    const CARTESIA_KEY = "sk_car_oW2vqA4rhyZgZYkbYnPhcv";
+    const DEEPGRAM_KEY = "52c4137114e2f86597c78326be7b512daae7f266";
+    const OPENAI_API_KEY = "OPENAI_KEY_REMOVED";
+
+    const LANGUAGES = [
+      { code: 'auto', name: '✨ Auto-detect' },
+      { code: 'en', name: 'English' }, { code: 'nl', name: 'Dutch' },
+      { code: 'fr', name: 'French' }, { code: 'de', name: 'German' },
+      { code: 'es', name: 'Spanish' }, { code: 'it', name: 'Italian' },
+      { code: 'tl', name: 'Filipino' }, { code: 'ja', name: 'Japanese' },
+      { code: 'ko', name: 'Korean' }, { code: 'zh', name: 'Chinese' },
+      { code: 'ar', name: 'Arabic' }, { code: 'hi', name: 'Hindi' }
+    ];
+
+    const ui = {
+      modal: document.getElementById('welcomeModal'), srcLang: document.getElementById('srcLang'),
+      tgtLang: document.getElementById('tgtLang'), username: document.getElementById('usernameInput'),
+      micBtn: document.getElementById('micBtn'), speakerBtn: document.getElementById('speakerBtn'),
+      chat: document.getElementById('chatArea'), roomDisplay: document.getElementById('roomIdDisplay')
+    };
+
+    function init() {
+        LANGUAGES.forEach(l => {
+            ui.srcLang.add(new Option(l.name, l.code));
+            ui.tgtLang.add(new Option(l.name, l.code));
+        });
+        ui.srcLang.value = "auto";
+        ui.tgtLang.value = "en";
+    }
+    init();
+
+    document.getElementById('tabCreate').onclick = () => { 
+        document.getElementById('createMode').classList.remove('hidden'); 
+        document.getElementById('joinMode').classList.add('hidden'); 
+        document.getElementById('tabCreate').classList.add('active'); 
+        document.getElementById('tabJoin').classList.remove('active'); 
+    };
+    document.getElementById('tabJoin').onclick = () => { 
+        document.getElementById('createMode').classList.add('hidden'); 
+        document.getElementById('joinMode').classList.remove('hidden'); 
+        document.getElementById('tabCreate').classList.remove('active'); 
+        document.getElementById('tabJoin').classList.add('active'); 
+    };
+
+    document.getElementById('modalCreateBtn').onclick = () => { if(!ui.username.value) return; CURRENT_ROOM_ID = "ORBIT-" + Math.random().toString(36).substring(2,8).toUpperCase(); USER_NAME = ui.username.value; start(); };
+    document.getElementById('modalJoinBtn').onclick = () => { const id = document.getElementById('classIdInput').value; if(!ui.username.value || !id) return; CURRENT_ROOM_ID = id.toUpperCase(); USER_NAME = ui.username.value; start(); };
+
+    function start() { ui.modal.classList.add('hidden'); ui.roomDisplay.textContent = CURRENT_ROOM_ID; window.initNet(); }
+
+    ui.speakerBtn.onclick = () => { 
+        speakerOn = !speakerOn; 
+        ui.speakerBtn.classList.toggle('speaker-active', speakerOn);
+        ui.speakerBtn.querySelector('span').textContent = speakerOn ? "Speaker On" : "Speaker Off";
+    };
+
+    document.getElementById('copyBtn').onclick = () => {
+        navigator.clipboard.writeText(CURRENT_ROOM_ID);
+    };
+</script>
+
+
+<script type="module">
+let supabase, channel;
+window.initNet = async () => {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    channel = supabase.channel(`room:${CURRENT_ROOM_ID}`);
+    channel.on('broadcast', { event: 'speech' }, async (p) => {
+        const d = p.payload;
+        if(d.sid === INSTANCE_ID) return;
+        
+        const myTgt = document.getElementById('tgtLang').value;
+        const needsTranslation = d.lang !== myTgt;
+        
+        const msgId = window.msg(d.name, needsTranslation ? "Translating..." : d.text);
+        
+        // Non-blocking translation chain
+        (async () => {
+            let finalTxt = d.text;
+            if(needsTranslation) {
+                finalTxt = await window.translate(d.text, myTgt);
+                window.updateMsg(msgId, finalTxt);
+            }
+            if(window.speakerOn) window.speak(finalTxt);
+        })();
+    }).subscribe();
+};
+
+window.send = async (text, langCode) => {
+    channel.send({ type: 'broadcast', event: 'speech', payload: { sid: INSTANCE_ID, name: USER_NAME, text, lang: langCode } });
+    window.msg("You", text, true);
+};
+</script>
+
+<script>
+window.msg = (name, text, me = false) => {
+    const id = "m-" + Math.random().toString(36).substring(2);
+    const d = document.createElement('div'); 
+    d.className = me ? 'msg-item me' : 'msg-item'; d.id = id;
+    d.innerHTML = `<div class="msg-meta">${name}</div><div class="msg-bubble">${text}</div>`;
+    ui.chat.appendChild(d); ui.chat.scrollTop = ui.chat.scrollHeight;
+    return id;
+};
+
+window.updateMsg = (id, text) => {
+    const el = document.getElementById(id);
+    if(el) el.querySelector('.msg-bubble').textContent = text;
+};
+
+window.translate = async (text, targetLang) => {
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` },
+            body: JSON.stringify({ 
+                model: "gpt-4o-mini", 
+                messages: [{ role: "system", content: `Translate to ${targetLang}. Output ONLY translation.` }, { role: "user", content: text }], 
+                temperature: 0.1 
+            })
+        });
+        const d = await res.json(); return d.choices[0].message.content.trim();
+    } catch(e) { return text; }
+};
+
+const audioQueue = [];
+let isPlaying = false;
+const audioEl = document.getElementById('tts');
+
+// Sequential Playback System
+audioEl.onended = () => {
+    isPlaying = false;
+    processQueue();
+};
+
+const processQueue = () => {
+    if(isPlaying || audioQueue.length === 0) return;
+    const nextBlob = audioQueue.shift();
+    isPlaying = true;
+    audioEl.src = URL.createObjectURL(nextBlob);
+    audioEl.play().catch(e => {
+        console.error("Playback failed", e);
+        isPlaying = false;
+        processQueue();
+    });
+};
+
+window.speak = async (text) => {
+    try {
+        const res = await fetch("https://api.cartesia.ai/tts/bytes", {
+            method: "POST", headers: { "Content-Type": "application/json", "X-API-Key": CARTESIA_KEY, "Cartesia-Version": "2024-06-10" },
+            body: JSON.stringify({ 
+                model_id: "sonic-multilingual", 
+                transcript: text, 
+                voice: { mode: "id", id: "79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e" }, 
+                output_format: { container: "wav", encoding: "pcm_f32le", sample_rate: 44100 } 
+            })
+        });
+        const blob = await res.blob();
+        audioQueue.push(blob);
+        processQueue();
+    } catch(e) {}
+};
+
+let dg, recorder, isMic = false;
+ui.micBtn.onclick = async () => {
+    if(isMic) { 
+        isMic = false; ui.micBtn.classList.remove('mic-active'); ui.micBtn.querySelector('span').textContent = "Mic Off";
+        if(recorder) recorder.stop(); if(dg) dg.close(); return; 
+    }
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        isMic = true; ui.micBtn.classList.add('mic-active'); ui.micBtn.querySelector('span').textContent = "Listening...";
+        
+        let lang = ui.srcLang.value;
+        // FIX: Using nova-3 and language=multi for auto-detection in streaming
+        let url = `wss://api.deepgram.com/v1/listen?model=nova-3&smart_format=true&interim_results=false`;
+        if(lang === 'auto') url += `&language=multi`; else url += `&language=${lang === 'tl' ? 'fil' : lang}`;
+        
+        dg = new WebSocket(url, ['token', DEEPGRAM_KEY]);
+        dg.onopen = () => { 
+            recorder = new MediaRecorder(stream); 
+            recorder.ondataavailable = e => { if(dg.readyState === 1 && e.data.size > 0) dg.send(e.data); }; 
+            recorder.start(250); 
+        };
+        dg.onmessage = m => {
+            const d = JSON.parse(m.data); const t = d.channel?.alternatives[0]?.transcript;
+            if(t && d.is_final) {
+                const detected = d.channel.alternatives[0].languages?.[0] || lang;
+                window.send(t, detected);
+            }
+        };
+        dg.onerror = e => console.error("DG Error", e);
+    } catch(err) { alert("Mic error"); isMic = false; }
+};
+
+const handBtn = document.getElementById('raiseHandBtn');
+    if (handBtn) {
+        handBtn.onclick = () => handBtn.classList.toggle('raised');
+    }
+</script>
+</body>
+</html>

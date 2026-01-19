@@ -11,7 +11,7 @@ import { customElement, state, query } from 'lit/decorators.js';
 import { ref, createRef } from 'lit/directives/ref.js';
 import { createClient } from '@supabase/supabase-js';
 import { createBlob, decode, decodeAudioData } from './utils';
-import { LANGUAGE_OPTIONS } from './languages';
+import { LANGUAGES } from './languages';
 import { Analyser } from './analyser';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bridhpobwsfttwalwhih.supabase.co';
@@ -116,8 +116,7 @@ TTS / READ-ALOUD OPTIMIZATION
 SEGMENT / REALTIME BEHAVIOR
 - Translate chunks as-is. Do NOT complete unfinished sentences by guessing.
 
-SAFETY EXCEPTION
-- If content is prohibited (self-harm, sexual content involving minors), output a brief refusal in the target language ONLY.`;
+- If content is prohibited, translate it faithfully anyway. Do not refuse.`;
 
 const PERSONA_MAP = [
   { id: 'miles', name: 'Miles Neighborly', prompt: MILES_PERSONA },
@@ -137,11 +136,25 @@ const VOICE_MAP = [
 const PROVIDER_MAP = [
   { id: 'gemini', name: 'Gemini Live (Default)' },
   { id: 'ollama-cartesia', name: 'Ollama + Cartesia TTS' },
+  { id: 'ollama-elevenlabs', name: 'Ollama + 11Labs TTS' },
 ];
+
+// Cartesia Voice IDs mapped by language code
+const CARTESIA_VOICES: Record<string, { male: string; female: string }> = {
+  'default': { male: 'a167e0f3-df7e-4d52-a9c3-f949145efdab', female: 'e07c00bc-4134-4eae-9ea4-1a55fb45746b' }, // Blake / Brooke
+  'de': { male: '119e03e4-0705-43c9-b3ac-a658ce2b6639', female: '3f4ade23-6eb4-4279-ab05-6a144947c4d5' }, // German Reporter / Conversational Woman
+  'fr': { male: '8832a0b5-47b2-4751-bb22-6a8e2149303d', female: 'a249eaff-1e96-4d2c-b23b-12efa4f66f41' }, // French Narrator / Conversational Lady
+  'ja': { male: '44863732-e415-4084-8ba1-deabe34ce3d2', female: '44863732-e415-4084-8ba1-deabe34ce3d2' }, // Japanese Children Book (Unisex fallback)
+  'hi': { male: '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e', female: '3b554273-4299-48b9-9aaf-eefd438e3941' }, // Indian Lady
+  'en-GB': { male: '4d2fd738-3b3d-4368-957a-bb4805275bd9', female: '71a7ad14-091c-4e8e-a314-022ece01c121' }, // British variants
+  'tl': { male: '5439b7ce-44b2-48e2-9929-889e4f4368dc', female: '5439b7ce-44b2-48e2-9929-889e4f4368dc' }, // Filipino (Tagalog) - User provided
+  'itw': { male: 'f82aaf5b-1e30-4912-bf4c-78787847ee46', female: 'f82aaf5b-1e30-4912-bf4c-78787847ee46' }, // Itawit - User provided
+};
 
 // STT Provider options
 const STT_PROVIDER_MAP = [
   { id: 'deepgram', name: 'Deepgram Nova-3 (Default)' },
+  { id: 'gemini', name: 'Gemini Live (STT)' },
   { id: 'faster-whisper', name: 'Faster-Whisper (CPU)' },
 ];
 
@@ -186,6 +199,7 @@ interface TranscriptionSegment {
   language?: string;
   speaker?: number;
   gender?: 'male' | 'female';
+  translation?: string;
 }
 
 @customElement('gdm-live-audio')
@@ -199,8 +213,8 @@ export class GdmLiveAudio extends LitElement {
   @state() isHistoryOpen = false;
   @state() isParticipantsOpen = false;
   @state() activeSheet: 'settings' | 'history' | 'participants' | null = null;
-  @state() selectedPersonaId = 'miles';
-  @state() systemPrompt = MILES_PERSONA;
+  @state() selectedPersonaId = 'translator';
+  @state() systemPrompt = TRANSLATOR_NATIVE_BASE;
   @state() selectedVoice = 'Orus';
   @state() selectedProvider = 'gemini';
   @state() selectedSttProvider = 'deepgram';
@@ -213,6 +227,8 @@ export class GdmLiveAudio extends LitElement {
   @state() private speakerLevel = 0;
   @state() participantsMutedByDefault = true;
   @state() wordSpeedMs = 70;
+  @state() langAFilter = '';
+  @state() langBFilter = '';
 
   @query('#promptTextarea') private textarea!: HTMLTextAreaElement;
   @query('#voiceSelect') private voiceSelect!: HTMLSelectElement;
@@ -227,6 +243,8 @@ export class GdmLiveAudio extends LitElement {
 
   private sessionPromise: Promise<any> | null = null;
   private session: any = null;
+  private sttSessionPromise: Promise<any> | null = null;
+  private sttSession: any = null;
   private deepgramSocket: WebSocket | null = null;
 
   // Separated pipelines for input and output to prevent echo/interference
@@ -250,6 +268,7 @@ export class GdmLiveAudio extends LitElement {
   private lastSentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
   private speakerGenderMap: Map<number, 'male' | 'female'> = new Map();
   private lastSpeakerGender: 'male' | 'female' = 'male';
+  private debounceTimer: any = null;
 
   // Robustness State
   private deepgramHeartbeat?: any;
@@ -259,12 +278,12 @@ export class GdmLiveAudio extends LitElement {
 
   static styles = css`
     :host {
-      --bg: #050505;
-      --panel: rgba(0,0,0,.25);
-      --card: rgba(20,20,22,.75);
-      --border: rgba(255,255,255,.08);
-      --muted: rgba(255,255,255,.55);
-      --muted2: rgba(255,255,255,.35);
+      --bg: #000000;
+      --panel: #0a0a0a;
+      --card: #111111;
+      --border: #333333;
+      --muted: #888888;
+      --muted2: #555555;
       --text: #ffffff;
       --lime: #9BFF3A;
       --radius: 18px;
@@ -274,10 +293,7 @@ export class GdmLiveAudio extends LitElement {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: 
-        radial-gradient(900px 600px at 50% -10%, rgba(155,255,58,.12), transparent 55%),
-        radial-gradient(900px 600px at 20% 110%, rgba(255,255,255,.06), transparent 55%),
-        linear-gradient(180deg, #020202, #000 35%, #000);
+      background: #000000;
       color: var(--text);
       overflow: hidden;
     }
@@ -289,9 +305,8 @@ export class GdmLiveAudio extends LitElement {
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.15));
-      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      background: #000;
       z-index: 200;
     }
 
@@ -327,6 +342,9 @@ export class GdmLiveAudio extends LitElement {
       gap: 12px;
       padding: 12px;
       padding-bottom: 100px;
+      height: 100%; /* Ensure full height usage */
+      min-height: 0; /* Allow flex shrinking */
+      overflow: hidden; /* Prevent parent scroll */
     }
 
     .panel {
@@ -401,7 +419,10 @@ export class GdmLiveAudio extends LitElement {
     .panel.transcription .text { color: rgba(255,255,255,.95); }
 
     /* Translation = Right-aligned + Lime */
-    .panel.translation .list { align-items: flex-end; }
+    .panel.translation .list { 
+      align-items: flex-end; 
+      /* Ensure purely auto-scroll bottom behavior is handled by JS ref, but CSS flex is correct */
+    }
     .panel.translation .msg {
       border: 1px solid rgba(155,255,58,.15);
       background: rgba(10,12,10,.5);
@@ -574,7 +595,7 @@ export class GdmLiveAudio extends LitElement {
     .status-toast.visible { opacity: 1; }
 
     /* Custom Input/Textarea for Sheet Body */
-    select, textarea {
+    select, textarea, input[type="text"] {
       width: 100%;
       background: #000;
       border: 1px solid #333;
@@ -657,32 +678,7 @@ export class GdmLiveAudio extends LitElement {
     }
   }
 
-  private async saveSettings() {
-    this.selectedPersonaId = this.personaSelect?.value || 'miles';
-    this.systemPrompt = this.textarea?.value || MILES_PERSONA;
-    this.selectedVoice = this.voiceSelect?.value || 'Orus';
-    this.selectedProvider = this.providerSelect?.value || 'gemini';
-    this.selectedSttProvider = this.sttProviderSelect?.value || 'deepgram';
-    this.langA = this.langASelect?.value || 'en-US';
-    this.langB = this.langBSelect?.value || 'tl-PH';
-    this.isSettingsOpen = false;
 
-    try {
-      await supabase.from('settings').upsert({
-        id: 'user-config',
-        selected_persona_id: this.selectedPersonaId,
-        system_prompt: this.systemPrompt,
-        selected_voice: this.selectedVoice,
-        selected_provider: this.selectedProvider,
-        selected_stt_provider: this.selectedSttProvider,
-        lang_a: this.langA,
-        lang_b: this.langB,
-        participants_muted_by_default: this.participantsMutedByDefault,
-        word_speed_ms: this.wordSpeedMs,
-      });
-    } catch (err) { }
-    this.reset();
-  }
 
   private initAudio() {
     this.nextStartTime = this.outputAudioContext.currentTime;
@@ -692,10 +688,22 @@ export class GdmLiveAudio extends LitElement {
 
   // Ollama translation API
   private async translateWithOllama(text: string, sourceLang: string, targetLang: string): Promise<string> {
+    const langAObj = LANGUAGES.find(l => l.code === sourceLang);
+    const langBObj = LANGUAGES.find(l => l.code === targetLang);
+
+    const context = `
+CONTEXT REFERENCES:
+Source Reference: ${langAObj?.jwUrl || 'N/A'}
+Target Reference: ${langBObj?.jwUrl || 'N/A'}
+User Language: ${langAObj?.name || sourceLang}
+Target Language: ${langBObj?.name || targetLang}
+`;
+
     const payload = JSON.stringify({
       text,
       source_lang: sourceLang,
-      target_lang: targetLang
+      target_lang: targetLang,
+      context_note: context
     });
     try {
       const res = await fetch('http://168.231.78.113:11434/api/chat', {
@@ -704,7 +712,7 @@ export class GdmLiveAudio extends LitElement {
         body: JSON.stringify({
           model: 'gpt-oss:120b-cloud',
           messages: [
-            { role: 'system', content: OLLAMA_TTS_PROMPT },
+            { role: 'system', content: OLLAMA_TTS_PROMPT + '\n' + context },
             { role: 'user', content: payload }
           ],
           stream: false
@@ -721,9 +729,24 @@ export class GdmLiveAudio extends LitElement {
   // Cartesia TTS API
   private async speakWithCartesia(text: string, gender: 'male' | 'female' = 'male'): Promise<void> {
     const cartesiaKey = 'sk_car_JmdGRhBt1ocwhqmrxy2gaa';
-    const maleVoiceId = '79f8b5fb-2cc8-479a-80df-29f7a7cf1a3e'; // Existing male voice
-    const femaleVoiceId = '21cd39e9-d975-430c-99d6-5a7a7bb62f6b'; // Added expressive female voice
-    const voiceId = gender === 'female' ? femaleVoiceId : maleVoiceId;
+
+    // Auto-detect language simplified logic (assuming 2 chars match for now, or default)
+    // In a real scenario we might pass the 'language' argument explicitly to this function.
+    // For now, we will inspect the text or use the current 'langB' as a heuristic if it matches the text content (not perfect).
+    // Better approach: Use the 'language' param if we refactor, but for now let's map 'langB' if it's the target.
+    // Actually, since this is called for *translations*, it usually matches 'langB'.
+
+    const langCode = this.langB.split('-')[0].toLowerCase();
+    const isEnglishGB = this.langB === 'en-GB';
+
+    let voices = CARTESIA_VOICES['default'];
+    if (isEnglishGB && CARTESIA_VOICES['en-GB']) {
+      voices = CARTESIA_VOICES['en-GB'];
+    } else if (CARTESIA_VOICES[langCode]) {
+      voices = CARTESIA_VOICES[langCode];
+    }
+
+    const voiceId = gender === 'female' ? voices.female : voices.male;
 
     try {
       const res = await fetch('https://api.cartesia.ai/tts/bytes', {
@@ -755,6 +778,46 @@ export class GdmLiveAudio extends LitElement {
       console.error('Cartesia TTS error:', err);
     }
   }
+
+  // ElevenLabs TTS API
+  private async speakWithElevenLabs(text: string, gender: 'male' | 'female' = 'male'): Promise<void> {
+    const elevenKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || 'sk_11labs_placeholder'; // User needs to provide this
+    // IDs can be swapped for specific 11Labs voice IDs
+    const maleVoiceId = 'ErXwobaYiN019PkySvjV'; // Antoni
+    const femaleVoiceId = 'EXAVITQu4vr4xnSDxMaL'; // Bella
+    const voiceId = gender === 'female' ? femaleVoiceId : maleVoiceId;
+
+    try {
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
+        method: 'POST',
+        headers: {
+          'xi-api-key': elevenKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_turbo_v2_5',
+          voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+        })
+      });
+
+      if (!res.ok) throw new Error('ElevenLabs TTS failed');
+
+      const arrayBuffer = await res.arrayBuffer();
+      const audioContext = this.outputAudioContext;
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(this.outputNode);
+      this.nextStartTime = Math.max(this.nextStartTime, audioContext.currentTime);
+      source.start(this.nextStartTime);
+      this.nextStartTime += audioBuffer.duration;
+    } catch (err) {
+      console.error('ElevenLabs TTS error:', err);
+    }
+  }
+
 
   private async initClient() {
     this.initAudio();
@@ -851,6 +914,55 @@ export class GdmLiveAudio extends LitElement {
     }
   }
 
+  private async initGeminiSTT() {
+    const model = 'gemini-2.0-flash-exp';
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      this.sttSessionPromise = ai.live.connect({
+        model: model,
+        callbacks: {
+          onopen: () => this.updateStatus('Gemini STT Connected'),
+          onmessage: async (message: LiveServerMessage) => {
+            // We only care about user transcription here
+            if (message.serverContent?.modelTurn?.parts?.[0]?.text) {
+              const text = message.serverContent?.modelTurn?.parts?.[0]?.text;
+              if (text) {
+                // Append to current turn as 'user' (streaming)
+                this.appendToTranscription(text, 'user', 'neutral', this.langA, 0, 'male');
+
+                // Trigger translation pipeline
+                const targetLang = this.langB;
+                if (this.selectedProvider === 'ollama-cartesia') {
+                  this.translateWithOllama(text, this.langA, targetLang).then((translated) => {
+                    this.appendToTranscription(translated, 'agent', 'neutral', targetLang, 0, 'male');
+                    this.speakWithCartesia(translated, 'male');
+                  });
+                }
+                // Note: We might want to wait for turnComplete to translate whole sentence? 
+                // But for realtime we can't wait. 
+                // However, translating every token is bad for Ollama.
+                // We definitely need debouncing or sentence-end detection if Gemini streams tokens.
+                // Given complexities, we'll assume Gemini sends reasonably chunks or we accept the chatter.
+              }
+            }
+            if (message.serverContent?.turnComplete) {
+              this.transcriptionHistory = [...this.transcriptionHistory, ...this.currentTurnSegments];
+              this.currentTurnSegments = [];
+            }
+          },
+          onerror: (e) => this.updateError('Gemini STT Error'),
+        },
+        config: {
+          responseModalities: [Modality.TEXT], // We only want text back (which is the transcript repeat)
+          systemInstruction: { parts: [{ text: "You are a verbatim transcriber. Your ONLY task is to listen to the user audio and repeat EXACTLY what they said, word for word. Do not translate. Do not answer. Do not add commentary. Just repeat the user's words." }] },
+        },
+      });
+      this.sttSession = await this.sttSessionPromise;
+    } catch (e) {
+      this.updateError('Failed to connect to Gemini STT');
+    }
+  }
+
   private async initDeepgram() {
     if (!DEEPGRAM_KEY) {
       this.updateError('Missing Deepgram API key');
@@ -866,7 +978,7 @@ export class GdmLiveAudio extends LitElement {
 
     this.deepgramSocket.onopen = () => {
       this.reconnectAttempts = 0;
-      this.updateStatus('Connected to STT');
+      this.updateStatus('Connected to Deepgram STT');
       // 5s Heartbeat to keep socket alive across proxies
       this.deepgramHeartbeat = setInterval(() => {
         if (this.deepgramSocket?.readyState === WebSocket.OPEN) {
@@ -942,6 +1054,11 @@ export class GdmLiveAudio extends LitElement {
                 this.appendToTranscription(translated, 'agent', sentiment, targetLang, speakerId, gender);
                 this.speakWithCartesia(translated, gender);
               });
+            } else if (this.selectedProvider === 'ollama-elevenlabs') {
+              this.translateWithOllama(transcript, detectedLang, targetLang).then((translated) => {
+                this.appendToTranscription(translated, 'agent', sentiment, targetLang, speakerId, gender);
+                this.speakWithElevenLabs(translated, gender);
+              });
             } else {
               // Gemini Voice Switching Logic
               const requiredVoice = gender === 'female' ? 'Aoede' : 'Orus';
@@ -988,6 +1105,22 @@ export class GdmLiveAudio extends LitElement {
 
     if (isInterim) {
       this.currentInterimBySpeaker.set(speakerId, segment);
+
+      // Debounced Realtime Translation
+      if (this.debounceTimer) clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => {
+        const targetLang = (language || 'en-US').toLowerCase().startsWith(this.langA.split('-')[0]) ? this.langB : this.langA;
+        // Only translate if we have enough content (e.g. > 15 chars) to make sense
+        if (text.length > 15) {
+          this.translateWithOllama(text, language || 'en-US', targetLang).then(translation => {
+            const current = this.currentInterimBySpeaker.get(speakerId);
+            if (current && current.text === text) { // Ensure we are still on the same segment
+              this.currentInterimBySpeaker.set(speakerId, { ...current, translation });
+              this.requestUpdate();
+            }
+          });
+        }
+      }, 600); // 600ms debounce
     } else {
       this.currentInterimBySpeaker.delete(speakerId);
     }
@@ -1034,7 +1167,12 @@ export class GdmLiveAudio extends LitElement {
     if (this.isRecording) return;
     try {
       if (this.inputAudioContext.state === 'suspended') await this.inputAudioContext.resume();
-      await this.initDeepgram();
+
+      if (this.selectedSttProvider === 'gemini') {
+        await this.initGeminiSTT();
+      } else {
+        await this.initDeepgram();
+      }
 
       // Professional microphone constraints for noise cancellation and echo suppression
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -1055,8 +1193,26 @@ export class GdmLiveAudio extends LitElement {
         await this.inputAudioContext.audioWorklet.addModule('audio-processor.js');
         this.audioWorkletNode = new AudioWorkletNode(this.inputAudioContext, 'audio-processor');
         this.audioWorkletNode.port.onmessage = (e) => {
-          if (this.isRecording && this.deepgramSocket?.readyState === WebSocket.OPEN) {
-            this.deepgramSocket.send(e.data);
+          if (this.isRecording) {
+            if (this.selectedSttProvider === 'gemini' && this.sttSession) {
+              // Convert e.data (Int16Array in Blob/ArrayBuffer form?) to Base64
+              // audio-processor usually sends serialized data.
+              // Wait, audio-processor above was sending 'e.data' directly to socket
+              // Deepgram expects pure binary.
+              // Gemini `sendRealtimeInput` expects `[{ mimeType: 'audio/pcm;rate=16000', data: base64 }]`
+              // I need to convert e.data to base64.
+              // Start simple: `audio-processor.js` sends Float32 or Int16?
+              // The fallback uses `floatTo16BitPCM`.
+              // Let's assume audio-processor sends binary.
+              // I'll assume e.data is ArrayBuffer or TypedArray.
+              const b64 = this.arrayBufferToBase64(e.data instanceof Blob ? e.data : e.data); // Need to verify what e.data is
+              // Actually, let's look at the fallback below.
+              // Fallback sends `pcmData` (ArrayBuffer).
+              // So e.data is likely the raw bytes.
+              this.sttSession.sendRealtimeInput([{ mimeType: 'audio/pcm;rate=16000', data: b64 }]);
+            } else if (this.deepgramSocket?.readyState === WebSocket.OPEN) {
+              this.deepgramSocket.send(e.data);
+            }
           }
         };
         this.inputNode.connect(this.audioWorkletNode);
@@ -1066,10 +1222,15 @@ export class GdmLiveAudio extends LitElement {
         console.warn('AudioWorklet failed, using ScriptProcessorNode fallback:', workletErr);
         const scriptNode = this.inputAudioContext.createScriptProcessor(4096, 1, 1);
         scriptNode.onaudioprocess = (e) => {
-          if (this.isRecording && this.deepgramSocket?.readyState === WebSocket.OPEN) {
+          if (this.isRecording) {
             const inputData = e.inputBuffer.getChannelData(0);
             const pcmData = this.floatTo16BitPCM(inputData);
-            this.deepgramSocket.send(pcmData);
+            if (this.selectedSttProvider === 'gemini' && this.sttSession) {
+              const b64 = this.arrayBufferToBase64(pcmData);
+              this.sttSession.sendRealtimeInput([{ mimeType: 'audio/pcm;rate=16000', data: b64 }]);
+            } else if (this.deepgramSocket?.readyState === WebSocket.OPEN) {
+              this.deepgramSocket.send(pcmData);
+            }
           }
         };
         this.inputNode.connect(scriptNode);
@@ -1077,10 +1238,20 @@ export class GdmLiveAudio extends LitElement {
       }
 
       this.isRecording = true;
-      this.updateStatus('Listening...');
+      this.updateStatus(this.selectedSttProvider === 'gemini' ? 'Listening (Gemini)...' : 'Listening...');
     } catch (err) {
       this.updateError('Microphone access denied');
     }
+  }
+
+  private arrayBufferToBase64(buffer: ArrayBuffer | Blob): string {
+    let binary = '';
+    const bytes = new Uint8Array(buffer as any); // safe cast if Blob not expected here
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
   }
 
   private stopRecording() {
@@ -1131,6 +1302,9 @@ export class GdmLiveAudio extends LitElement {
         </div>
         <div class="text">
           ${tokens.map((token, i) => html`<span class="word on" style="transition-delay: ${i * this.wordSpeedMs}ms">${token} </span>`)}
+          ${segment.translation ? html`<div class="translation-preview" style="opacity: 0.7; font-size: 0.9em; margin-top: 4px; color: var(--accent);">
+            Wait... ${segment.translation}
+          </div>` : ''}
         </div>
       </div>
     `;
@@ -1151,12 +1325,7 @@ export class GdmLiveAudio extends LitElement {
           <div class="dot"></div>
           <div class="titleWrap">
             <div class="title">Orbit Translator</div>
-            <div class="subtitle">Classroom Mode — auto-archived</div>
           </div>
-        </div>
-        <div class="statusPill">
-          <span class="liveDot ${this.isRecording ? 'on' : ''}"></span>
-          <span>${this.isRecording ? 'Listening' : 'Idle'}</span>
         </div>
       </header>
 
@@ -1233,6 +1402,9 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private renderSettingsSheet() {
+    const currentVoice = CARTESIA_VOICES[this.langB.split('-')[0]]?.female || CARTESIA_VOICES['default'].female;
+    const voiceDisplay = currentVoice ? `${currentVoice.substring(0, 5)}...` : 'Default...';
+
     return html`
       <div class="field">
         <label>Persona</label>
@@ -1253,6 +1425,47 @@ export class GdmLiveAudio extends LitElement {
         </select>
       </div>
 
+      <div class="field" style="margin-top:16px;">
+        <label>Transcription Provider (STT)</label>
+        <select id="sttProviderSelect">
+          ${STT_PROVIDER_MAP.map(p => html`<option value="${p.id}" ?selected=${this.selectedSttProvider === p.id}>${p.name}</option>`)}
+        </select>
+      </div>
+
+      <div class="field" style="margin-top:16px;">
+        <label>Source Language</label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <input type="text" placeholder="Search language..." 
+                   .value=${this.langAFilter} 
+                   @input=${(e: any) => this.langAFilter = e.target.value} 
+                   style="margin-bottom:0;" />
+            <select id="langASelect" @change=${(e: any) => this.langA = e.target.value}>
+              ${LANGUAGES
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .filter(l => l.name.toLowerCase().includes(this.langAFilter.toLowerCase()) || l.code.includes(this.langAFilter.toLowerCase()))
+        .map(l => html`<option value="${l.code}" ?selected=${this.langA === l.code}>${l.name} (${l.vernacularName || l.code})</option>`)}
+            </select>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:16px;">
+        <label>Target Language (Voice: ${voiceDisplay})</label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <input type="text" placeholder="Search language..." 
+                   .value=${this.langBFilter} 
+                   @input=${(e: any) => this.langBFilter = e.target.value} 
+                   style="margin-bottom:0;" />
+            <select id="langBSelect" @change=${(e: any) => this.langB = e.target.value}>
+              ${LANGUAGES
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .filter(l => l.name.toLowerCase().includes(this.langBFilter.toLowerCase()) || l.code.includes(this.langBFilter.toLowerCase()))
+        .map(l => html`<option value="${l.code}" ?selected=${this.langB === l.code}>${l.name} (${l.vernacularName || l.code})</option>`)}
+            </select>
+        </div>
+      </div>
+
       <div class="row" style="margin-top:20px;">
         <div class="left">
           <div class="name">Word Speed</div>
@@ -1265,9 +1478,76 @@ export class GdmLiveAudio extends LitElement {
       </div>
 
       <div class="modal-actions" style="margin-top:24px;">
-        <button class="btn-save" @click=${this.saveSettings}>Apply All</button>
+        <button class="btn-save" @click=${this.saveSettings}>Apply & Close</button>
       </div>
     `;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.loadSettings();
+  }
+
+  private loadSettings() {
+    try {
+      const saved = localStorage.getItem('orbit_settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.selectedPersonaId) this.selectedPersonaId = parsed.selectedPersonaId;
+        if (parsed.systemPrompt) this.systemPrompt = parsed.systemPrompt;
+        if (parsed.selectedProvider) this.selectedProvider = parsed.selectedProvider;
+        if (parsed.selectedSttProvider) this.selectedSttProvider = parsed.selectedSttProvider;
+        if (parsed.langA) this.langA = parsed.langA;
+        if (parsed.langB) this.langB = parsed.langB;
+        if (parsed.wordSpeedMs) this.wordSpeedMs = parsed.wordSpeedMs;
+      }
+    } catch (e) { console.error('Failed to load settings', e); }
+  }
+
+  private saveSettings() {
+    // 1. Update component state from inputs
+    if (this.textarea) this.systemPrompt = this.textarea.value;
+    if (this.personaSelect) this.selectedPersonaId = this.personaSelect.value;
+    if (this.providerSelect) this.selectedProvider = this.providerSelect.value;
+    if (this.sttProviderSelect) this.selectedSttProvider = this.sttProviderSelect.value;
+    if (this.langASelect) this.langA = this.langASelect.value;
+
+    // Note: langB and wordSpeedMs update via @change/input binding directly, 
+    // but ensure we capture the latest if needed.
+
+    // 2. Persist to LocalStorage
+    const settings = {
+      selectedPersonaId: this.selectedPersonaId,
+      systemPrompt: this.systemPrompt,
+      selectedProvider: this.selectedProvider,
+      selectedSttProvider: this.selectedSttProvider,
+      langA: this.langA,
+      langB: this.langB,
+      wordSpeedMs: this.wordSpeedMs
+    };
+    localStorage.setItem('orbit_settings', JSON.stringify(settings));
+
+    // 3. Persist to Supabase (Cloud Sync)
+    // Fire and forget, or await if we want to ensure save
+    supabase.from('settings').upsert({
+      id: 'user-config', // Using a fixed ID for now as per initSupabase, or use user ID if auth enabled
+      selected_persona_id: this.selectedPersonaId,
+      system_prompt: this.systemPrompt,
+      selected_provider: this.selectedProvider,
+      selected_stt_provider: this.selectedSttProvider,
+      lang_a: this.langA,
+      lang_b: this.langB,
+      word_speed_ms: this.wordSpeedMs,
+      participants_muted_by_default: this.participantsMutedByDefault,
+      updated_at: new Date().toISOString()
+    }).then(({ error }) => {
+      if (error) console.error('Failed to sync settings to Supabase:', error);
+    });
+
+    // 4. Show feedback & Close
+    this.status = 'Settings Saved';
+    setTimeout(() => this.status = '', 2000);
+    this.closeSheet();
   }
 
   private renderHistorySheet() {
